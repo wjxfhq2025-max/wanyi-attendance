@@ -44,6 +44,122 @@
     }
 })();
 </script>
+
+    <script>
+        // ========== API 集成模块 ==========
+        const API_BASE = '';  // 同源部署，无需指定域名
+
+        // 通用 API 请求函数
+        async function apiRequest(endpoint, options = {}) {
+            try {
+                const res = await fetch(${API_BASE}/api, {
+                    headers: { 'Content-Type': 'application/json', ...options.headers },
+                    ...options
+                });
+                if (!res.ok) throw new Error(HTTP );
+                return await res.json();
+            } catch (e) {
+                console.warn('API 请求失败，使用本地数据:', e.message);
+                return null;
+            }
+        }
+
+        // 从 API 加载数据
+        async function loadFromAPI() {
+            try {
+                const employees = await apiRequest('/employees');
+                if (employees && employees.length > 0) {
+                    const nombres = employees.filter(e => e.activo).map(e => e.nombre);
+                    localStorage.setItem('employee_names_v2', JSON.stringify(nombres));
+                    localStorage.setItem('employee_salaries_v6', JSON.stringify(
+                        Object.fromEntries(employees.map(e => [e.nombre, e.sueldoSemanal])))
+                    );
+                }
+
+                const attendance = await apiRequest('/attendance');
+                if (attendance && attendance.empleados) {
+                    localStorage.setItem('current_week_data', JSON.stringify(attendance.empleados));
+                }
+
+                const weeks = await apiRequest('/weeks');
+                if (weeks && weeks.length > 0) {
+                    const historial = weeks.map(w => ({
+                        id: w.id,
+                        fecha: new Date(w.semanaInicio).toLocaleDateString('zh'),
+                        empleados: w.empleados
+                    }));
+                    localStorage.setItem('attendance_historial', JSON.stringify(historial));
+                }
+
+                const salaryHistory = await apiRequest('/salary-history');
+                if (salaryHistory && salaryHistory.length > 0) {
+                    localStorage.setItem('salary_history_v6', JSON.stringify(salaryHistory));
+                }
+
+                const debts = await apiRequest('/debts');
+                if (debts) {
+                    localStorage.setItem('employee_debts_v2', JSON.stringify(debts));
+                }
+
+                console.log('✅ API 数据加载成功');
+                return true;
+            } catch (e) {
+                console.warn('⚠️ API 加载失败，使用本地数据:', e.message);
+                return false;
+            }
+        }
+
+        // 保存数据到 API（防抖处理）
+        let syncTimer = null;
+        function syncToAPI(dataType, data) {
+            if (syncTimer) clearTimeout(syncTimer);
+            syncTimer = setTimeout(async () => {
+                let endpoint = '';
+                let method = 'POST';
+                let body = { data: data };
+
+                switch(dataType) {
+                    case 'attendance': endpoint = '/attendance'; break;
+                    case 'employees': endpoint = '/employees'; break;
+                    case 'salary': endpoint = '/salary-history'; break;
+                    case 'debts': endpoint = '/debts'; break;
+                    default: return;
+                }
+
+                const result = await apiRequest(endpoint, {
+                    method: method,
+                    body: JSON.stringify(body)
+                });
+
+                if (result) {
+                    console.log('✅ ' + dataType + ' 已同步到 API');
+                }
+            }, 5000);
+        }
+
+        // 页面加载时从 API 加载数据
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadFromAPI();
+            if (typeof render === 'function') render();
+            if (typeof actualizarRanking === 'function') actualizarRanking();
+        });
+
+        // 监听 localStorage 变化，自动同步到 API
+        const originalSetItem = localStorage.setItem;
+        localStorage.setItem = function(key, value) {
+            originalSetItem.call(this, key, value);
+
+            if (key === 'current_week_data') {
+                syncToAPI('attendance', JSON.parse(value));
+            } else if (key === 'employee_salaries_v6') {
+                syncToAPI('employees', JSON.parse(value));
+            } else if (key === 'salary_history_v6') {
+                syncToAPI('salary', JSON.parse(value));
+            } else if (key === 'employee_debts_v2') {
+                syncToAPI('debts', JSON.parse(value));
+            }
+        };
+    </script>
     <style>
         /* ========== 全局重置与苹果风格字体（与原版完全一致） ========== */
         * {
