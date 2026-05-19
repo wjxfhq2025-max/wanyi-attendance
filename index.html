@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!-- saved from url=(0063)file:///C:/Users/Linda/Downloads/%E8%80%83%E5%8B%A4%20(16).html -->
 <html lang="zh"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
@@ -652,33 +652,22 @@
             @page { size: landscape; margin: 0.5cm; }
         }
     </style>
-        <!-- ===== 数据预加载（自动导入历史数据） ===== -->
+
+        <!-- Data Preload -->
         <script>
         (function() {
             document.addEventListener('DOMContentLoaded', function() {
-                console.log('🔄 开始检查本地数据...');
-                
-                // 1. 预加载当前周考勤数据
-                const currentWeekKey = 'current_week_data';
-                if (!localStorage.getItem(currentWeekKey)) {
-                    const data = {"Marlen":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Dulce":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Hanny":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Angeles":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Fernanda":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Melissa":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Francisco":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Priscila":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Hilary":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Miquel":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Adrian":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}}};
-                    localStorage.setItem(currentWeekKey, JSON.stringify(data));
-                    console.log('✅ 当前周考勤数据已预加载');
+                var cw = 'current_week_data';
+                if (!localStorage.getItem(cw)) {
+                    localStorage.setItem(cw, JSON.stringify({'Marlen':{},'Dulce':{},'Hanny':{},'Angeles':{},'Fernanda':{},'Melissa':{},'Francisco':{},'Priscila':{},'Hilary':{},'Miquel':{},'Adrian':{}}));
                 }
-                
-                // 2. 预加载历史记录
-                const historialKey = 'attendance_historial';
-                if (!localStorage.getItem(historialKey)) {
-                    const historial = [{"fecha":"2026/02/28 17:13","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]},{"fecha":"2026/03/07 17:15","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]},{"fecha":"2026/03/14 17:15","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]}];
-                    localStorage.setItem(historialKey, JSON.stringify(historial));
-                    console.log('✅ 历史记录已预加载（3周）');
+                var hk = 'attendance_historial';
+                if (!localStorage.getItem(hk)) {
+                    localStorage.setItem(hk, '[]');
                 }
-                
-                console.log('🎉 数据预加载完成！');
             });
         })();
         </script>
-        <!-- ===== 数据预加载结束 ===== -->
 </head>
 <body>
 <div class="container">
@@ -2344,33 +2333,22 @@
                         });
                     };
                 <\/script>
-                        <!-- ===== 数据预加载（自动导入历史数据） ===== -->
+                
+        <!-- Data Preload -->
         <script>
         (function() {
             document.addEventListener('DOMContentLoaded', function() {
-                console.log('🔄 开始检查本地数据...');
-                
-                // 1. 预加载当前周考勤数据
-                const currentWeekKey = 'current_week_data';
-                if (!localStorage.getItem(currentWeekKey)) {
-                    const data = {"Marlen":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Dulce":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Hanny":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Angeles":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Fernanda":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Melissa":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Francisco":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Priscila":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Hilary":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Miquel":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Adrian":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}}};
-                    localStorage.setItem(currentWeekKey, JSON.stringify(data));
-                    console.log('✅ 当前周考勤数据已预加载');
+                var cw = 'current_week_data';
+                if (!localStorage.getItem(cw)) {
+                    localStorage.setItem(cw, JSON.stringify({'Marlen':{},'Dulce':{},'Hanny':{},'Angeles':{},'Fernanda':{},'Melissa':{},'Francisco':{},'Priscila':{},'Hilary':{},'Miquel':{},'Adrian':{}}));
                 }
-                
-                // 2. 预加载历史记录
-                const historialKey = 'attendance_historial';
-                if (!localStorage.getItem(historialKey)) {
-                    const historial = [{"fecha":"2026/02/28 17:13","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]},{"fecha":"2026/03/07 17:15","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]},{"fecha":"2026/03/14 17:15","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]}];
-                    localStorage.setItem(historialKey, JSON.stringify(historial));
-                    console.log('✅ 历史记录已预加载（3周）');
+                var hk = 'attendance_historial';
+                if (!localStorage.getItem(hk)) {
+                    localStorage.setItem(hk, '[]');
                 }
-                
-                console.log('🎉 数据预加载完成！');
             });
         })();
         </script>
-        <!-- ===== 数据预加载结束 ===== -->
 </head>
                 <body>
                 <div class="container">
@@ -2518,33 +2496,22 @@
                     .rank-icon { font-size:1.2rem; }
                     .footer { margin-top:20px; color:#8e8e93; text-align:center; }
                 </style>
-                        <!-- ===== 数据预加载（自动导入历史数据） ===== -->
+                
+        <!-- Data Preload -->
         <script>
         (function() {
             document.addEventListener('DOMContentLoaded', function() {
-                console.log('🔄 开始检查本地数据...');
-                
-                // 1. 预加载当前周考勤数据
-                const currentWeekKey = 'current_week_data';
-                if (!localStorage.getItem(currentWeekKey)) {
-                    const data = {"Marlen":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Dulce":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Hanny":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Angeles":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Fernanda":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Melissa":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Francisco":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Priscila":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Hilary":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Miquel":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Adrian":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}}};
-                    localStorage.setItem(currentWeekKey, JSON.stringify(data));
-                    console.log('✅ 当前周考勤数据已预加载');
+                var cw = 'current_week_data';
+                if (!localStorage.getItem(cw)) {
+                    localStorage.setItem(cw, JSON.stringify({'Marlen':{},'Dulce':{},'Hanny':{},'Angeles':{},'Fernanda':{},'Melissa':{},'Francisco':{},'Priscila':{},'Hilary':{},'Miquel':{},'Adrian':{}}));
                 }
-                
-                // 2. 预加载历史记录
-                const historialKey = 'attendance_historial';
-                if (!localStorage.getItem(historialKey)) {
-                    const historial = [{"fecha":"2026/02/28 17:13","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]},{"fecha":"2026/03/07 17:15","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]},{"fecha":"2026/03/14 17:15","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]}];
-                    localStorage.setItem(historialKey, JSON.stringify(historial));
-                    console.log('✅ 历史记录已预加载（3周）');
+                var hk = 'attendance_historial';
+                if (!localStorage.getItem(hk)) {
+                    localStorage.setItem(hk, '[]');
                 }
-                
-                console.log('🎉 数据预加载完成！');
             });
         })();
         </script>
-        <!-- ===== 数据预加载结束 ===== -->
 </head>
                 <body>
                 <div class="container">
@@ -2639,33 +2606,22 @@
                     .signature-line { border-top: 3px dashed #8b4513; margin-top: 20px; padding-top: 12px; display: flex; align-items: center; gap: 10px; }
                     @media print { .print-actions { display: none; } .salary-card { break-inside: avoid; } }
                 </style>
-                        <!-- ===== 数据预加载（自动导入历史数据） ===== -->
+                
+        <!-- Data Preload -->
         <script>
         (function() {
             document.addEventListener('DOMContentLoaded', function() {
-                console.log('🔄 开始检查本地数据...');
-                
-                // 1. 预加载当前周考勤数据
-                const currentWeekKey = 'current_week_data';
-                if (!localStorage.getItem(currentWeekKey)) {
-                    const data = {"Marlen":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Dulce":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Hanny":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Angeles":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Fernanda":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Melissa":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Francisco":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Priscila":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Hilary":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Miquel":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}},"Adrian":{"lunes":{"entrada":"09:00","salida":"17:00"},"martes":{"entrada":"09:00","salida":"17:00"},"miercoles":{"entrada":"09:00","salida":"17:00"},"jueves":{"entrada":"09:00","salida":"17:00"},"viernes":{"entrada":"09:00","salida":"17:00"},"sabado":{"entrada":"09:00","salida":"17:00"}}};
-                    localStorage.setItem(currentWeekKey, JSON.stringify(data));
-                    console.log('✅ 当前周考勤数据已预加载');
+                var cw = 'current_week_data';
+                if (!localStorage.getItem(cw)) {
+                    localStorage.setItem(cw, JSON.stringify({'Marlen':{},'Dulce':{},'Hanny':{},'Angeles':{},'Fernanda':{},'Melissa':{},'Francisco':{},'Priscila':{},'Hilary':{},'Miquel':{},'Adrian':{}}));
                 }
-                
-                // 2. 预加载历史记录
-                const historialKey = 'attendance_historial';
-                if (!localStorage.getItem(historialKey)) {
-                    const historial = [{"fecha":"2026/02/28 17:13","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]},{"fecha":"2026/03/07 17:15","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]},{"fecha":"2026/03/14 17:15","empleados":["Marlen","Dulce","Hanny","Angeles","Fernanda","Melissa","Francisco","Priscila","Hilary","Miquel","Adrian","Empleado 12"]}];
-                    localStorage.setItem(historialKey, JSON.stringify(historial));
-                    console.log('✅ 历史记录已预加载（3周）');
+                var hk = 'attendance_historial';
+                if (!localStorage.getItem(hk)) {
+                    localStorage.setItem(hk, '[]');
                 }
-                
-                console.log('🎉 数据预加载完成！');
             });
         })();
         </script>
-        <!-- ===== 数据预加载结束 ===== -->
 </head>
                 <body>
                 <div class="print-container"><div class="print-actions"><button onclick="window.print()">🖨️ Imprimir</button></div><div class="cards-grid" id="cardsGrid"></div></div>
@@ -2820,4 +2776,3 @@
 </script>
 
 </body></html>
-
