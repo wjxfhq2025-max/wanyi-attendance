@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wanyi · 员工考勤 + 工资卡（最终完整版 - 新规则）</title>
     <!-- 引入 Chart.js 用于绘制柱形图 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="./Wanyi · 员工考勤 + 工资卡（最终完整版 - 新规则）_files/https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         /* ========== 全局重置与苹果风格字体（与原版完全一致） ========== */
         * {
@@ -2333,23 +2333,7 @@
                         });
                     };
                 <\/script>
-                
-        <!-- Data Preload -->
-        <script>
-        (function() {
-            document.addEventListener('DOMContentLoaded', function() {
-                var cw = 'current_week_data';
-                if (!localStorage.getItem(cw)) {
-                    localStorage.setItem(cw, JSON.stringify({'Marlen':{},'Dulce':{},'Hanny':{},'Angeles':{},'Fernanda':{},'Melissa':{},'Francisco':{},'Priscila':{},'Hilary':{},'Miquel':{},'Adrian':{}}));
-                }
-                var hk = 'attendance_historial';
-                if (!localStorage.getItem(hk)) {
-                    localStorage.setItem(hk, '[]');
-                }
-            });
-        })();
-        </script>
-</head>
+                </head>
                 <body>
                 <div class="container">
                 <h2>📅 历史周记录 - ${fecha}</h2>
@@ -2496,23 +2480,7 @@
                     .rank-icon { font-size:1.2rem; }
                     .footer { margin-top:20px; color:#8e8e93; text-align:center; }
                 </style>
-                
-        <!-- Data Preload -->
-        <script>
-        (function() {
-            document.addEventListener('DOMContentLoaded', function() {
-                var cw = 'current_week_data';
-                if (!localStorage.getItem(cw)) {
-                    localStorage.setItem(cw, JSON.stringify({'Marlen':{},'Dulce':{},'Hanny':{},'Angeles':{},'Fernanda':{},'Melissa':{},'Francisco':{},'Priscila':{},'Hilary':{},'Miquel':{},'Adrian':{}}));
-                }
-                var hk = 'attendance_historial';
-                if (!localStorage.getItem(hk)) {
-                    localStorage.setItem(hk, '[]');
-                }
-            });
-        })();
-        </script>
-</head>
+                </head>
                 <body>
                 <div class="container">
                 <h2>📋 员工考勤 ${title}</h2>
@@ -2606,23 +2574,7 @@
                     .signature-line { border-top: 3px dashed #8b4513; margin-top: 20px; padding-top: 12px; display: flex; align-items: center; gap: 10px; }
                     @media print { .print-actions { display: none; } .salary-card { break-inside: avoid; } }
                 </style>
-                
-        <!-- Data Preload -->
-        <script>
-        (function() {
-            document.addEventListener('DOMContentLoaded', function() {
-                var cw = 'current_week_data';
-                if (!localStorage.getItem(cw)) {
-                    localStorage.setItem(cw, JSON.stringify({'Marlen':{},'Dulce':{},'Hanny':{},'Angeles':{},'Fernanda':{},'Melissa':{},'Francisco':{},'Priscila':{},'Hilary':{},'Miquel':{},'Adrian':{}}));
-                }
-                var hk = 'attendance_historial';
-                if (!localStorage.getItem(hk)) {
-                    localStorage.setItem(hk, '[]');
-                }
-            });
-        })();
-        </script>
-</head>
+                </head>
                 <body>
                 <div class="print-container"><div class="print-actions"><button onclick="window.print()">🖨️ Imprimir</button></div><div class="cards-grid" id="cardsGrid"></div></div>
                 <script>
