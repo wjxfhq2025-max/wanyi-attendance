@@ -1,0 +1,2713 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wanyi · 员工考勤 + 工资卡管理系统</title>
+    <!-- 引入 Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* ========== 全局重置与苹果风格字体（与原版完全一致） ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f2f2f7;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #1c1c1e;
+        }
+
+        /* ========== 主容器 – 毛玻璃卡片，最大宽度1600px ========== */
+        .container {
+            max-width: 1600px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 44px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        /* ========== 公司头部 – 大标题居中 ========== */
+        .company-header {
+            padding: 28px 32px 20px 32px;
+            border-bottom: 1px solid rgba(60, 60, 67, 0.08);
+            text-align: center;
+        }
+
+        .company-name h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: #000;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 0;
+        }
+
+        .content {
+            padding: 0 24px 24px 24px;
+        }
+
+        /* ========== 规则说明 – 毛玻璃内嵌 ========== */
+        .subhead {
+            color: #1c1c1e;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 16px 20px;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        /* ========== 工具栏 – 统一蓝色渐变 ========== */
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 12px 16px;
+            border-radius: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            justify-content: space-between;
+        }
+
+        .toolbar-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar-group + .toolbar-group::before {
+            content: "|";
+            color: rgba(60,60,67,0.3);
+            margin-right: 6px;
+        }
+
+        button {
+            background: linear-gradient(145deg, #007aff, #005fc7);
+            border: none;
+            color: white;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+            transition: all 0.1s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        button:hover {
+            background: linear-gradient(145deg, #0066cc, #004999);
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
+        }
+
+        /* 禁用按钮样式：灰色渐变，明显区分锁定状态 */
+        button:disabled {
+            opacity: 1;
+            cursor: default;
+            pointer-events: none;
+            background: linear-gradient(145deg, #a0a0a0, #7a7a7a);
+            box-shadow: none;
+            transform: none;
+            border-color: rgba(255,255,255,0.1);
+            color: #e0e0e0;
+        }
+
+        button.outline {
+            background: rgba(255, 255, 255, 0.8);
+            color: #007aff;
+            border: 1px solid rgba(0, 122, 255, 0.3);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        button.outline:hover {
+            background: white;
+            border-color: #007aff;
+        }
+
+        button.outline:disabled {
+            background: rgba(220, 220, 220, 0.8);
+            color: #8a8a8e;
+            border: 1px solid rgba(140, 140, 140, 0.3);
+            box-shadow: none;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            background: rgba(255,255,255,0.3);
+            table-layout: fixed;
+        }
+
+        /* 列宽固定，每个时间列150px，姓名100px，删除40px，总宽1940px（超出1600px，会有滚动条） */
+        th:nth-child(1) { width: 100px; }
+        th:nth-child(2), th:nth-child(3) { width: 150px; }
+        th:nth-child(4), th:nth-child(5) { width: 150px; }
+        th:nth-child(6), th:nth-child(7) { width: 150px; }
+        th:nth-child(8), th:nth-child(9) { width: 150px; }
+        th:nth-child(10), th:nth-child(11) { width: 150px; }
+        th:nth-child(12), th:nth-child(13) { width: 150px; }
+        th:nth-child(14) { width: 40px; }
+
+        th {
+            background: rgba(255, 255, 255, 0.4);
+            color: #1c1c1e;
+            font-weight: 600;
+            padding: 14px 2px;
+            text-align: center;
+            border-bottom: 1px solid rgba(60, 60, 67, 0.1);
+        }
+
+        td {
+            padding: 8px 2px;
+            border-bottom: 1px solid rgba(60, 60, 67, 0.05);
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        /* 姓名列样式 – 与排名徽章统一 */
+        .employee-name {
+            background: transparent;
+            position: sticky;
+            left: 0;
+            border-right: 1px solid rgba(60, 60, 67, 0.1);
+        }
+        .employee-name input {
+            font-weight: 600;
+            font-size: 1.2rem;
+            background: #007aff;
+            color: white;
+            width: 90%;
+            border-radius: 40px;
+            padding: 6px 8px;
+            border: none;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+        }
+        .employee-name input:disabled {
+            background: #007aff;
+            color: #f0f0f0;
+            opacity: 0.9;
+        }
+
+        input {
+            width: 70px;  /* 缩小宽度，避免遮挡 */
+            padding: 6px 1px;
+            border: 1px solid rgba(60,60,67,0.1);
+            border-radius: 16px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background: white;
+            transition: 0.15s;
+            margin: 0 1px;
+            color: #1c1c1e;
+        }
+        input:focus {
+            outline: none;
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.2);
+        }
+        input:disabled {
+            background: #e5e5ea;
+            color: #3a3a3c;
+            border-color: #8e8e93;
+            opacity: 1;
+            font-weight: 600;
+        }
+
+        .time-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0px;  /* 无额外间隙，完全靠输入框自身边距 */
+            position: relative;
+        }
+
+        /* 签到图标 – 使用emoji，放大，原色，正常显示在单元格内 */
+        .sign-btn-camera {
+            flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: inherit;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            line-height: 1;
+            padding: 0;
+            display: none; /* 默认隐藏 */
+        }
+        .sign-btn-camera:hover {
+            transform: scale(1.1);
+        }
+        .sign-btn-camera:disabled {
+            color: #c4c4c6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff3b30;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0 4px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .delete-btn:hover {
+            background: rgba(255,59,48,0.1);
+        }
+
+        /* ========== 本周排名区域 – 西班牙语版本 ========== */
+        .result-area, .historial-area {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 32px;
+            padding: 20px 20px;
+            border: 1px solid rgba(255,255,255,0.7);
+            margin-bottom: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            color: #000;
+            letter-spacing: -0.5px;
+        }
+
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .employee-stat {
+            flex: 0 0 calc(33.333% - 7px);
+            min-width: 170px;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
+        }
+
+        .employee-stat.first {
+            border: 2px solid #ffd700;
+            background: rgba(255,215,0,0.1);
+        }
+        .employee-stat.second {
+            border: 2px solid silver;
+            background: rgba(192,192,192,0.1);
+        }
+        .employee-stat.third {
+            border: 2px solid #cd7f32;
+            background: rgba(205,127,50,0.1);
+        }
+
+        .rank-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 2px solid;
+        }
+        .first .rank-badge { color: #ffd700; border-color: #ffd700; }
+        .second .rank-badge { color: silver; border-color: silver; }
+        .third .rank-badge { color: #cd7f32; border-color: #cd7f32; }
+
+        .emp-name-badge {
+            background: #007aff;
+            color: white;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .stat-detail {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0,122,255,0.1);
+            padding: 2px 8px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+        }
+        .stat-label {
+            color: #1c1c1e;
+            font-weight: 500;
+        }
+        .stat-number {
+            font-weight: 700;
+            color: #007aff;
+        }
+
+        .perfect-badge {
+            background: #34c759;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+        }
+
+        /* ========== 历史记录区域 ========== */
+        .historial-area {
+            background: rgba(255, 255, 255, 0.6);
+        }
+        .historial-titulo {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: #1c1c1e;
+        }
+        .historial-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .historial-item {
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 60px;
+            padding: 10px 12px 10px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.8);
+            cursor: pointer;
+        }
+        .historial-item:hover {
+            background: rgba(255,255,255,0.9);
+        }
+        .historial-fecha {
+            font-weight: 500;
+            color: #1c1c1e;
+            font-size: 0.9rem;
+            flex: 2;
+        }
+        .historial-resumen {
+            color: #8e8e93;
+            font-size: 0.85rem;
+            flex: 1;
+            text-align: right;
+            margin-right: 8px;
+        }
+        .delete-history-btn {
+            background: none;
+            border: none;
+            color: #ff3b30;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.1s;
+        }
+        .delete-history-btn:hover {
+            background: rgba(255,59,48,0.1);
+        }
+
+        .footer-note {
+            margin-top: 12px;
+            color: #8e8e93;
+            font-size: 0.8rem;
+        }
+
+        .icon-btn {
+            font-size: 1.1rem;
+        }
+
+        /* ========== 当前时段高亮 – 仅显示相机图标，且保持较大间隙 ========== */
+        .highlight-col .time-cell {
+            gap: 8px; /* 当前时段列保持较大间隙，确保图标清晰 */
+        }
+        .highlight-col .sign-btn-camera {
+            display: flex; /* 当前时段显示相机图标 */
+        }
+
+        /* ========== 模态框通用样式 ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal {
+            background: white;
+            border-radius: 28px;
+            padding: 24px;
+            max-width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .salary-modal {
+            width: 1200px;
+        }
+
+        .debt-modal {
+            width: 1000px;
+        }
+
+        .category-modal {
+            width: 500px;
+        }
+
+        .modal h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #1c1c1e;
+        }
+        .modal .global-section {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .global-item {
+            flex: 1 1 160px;
+        }
+        .global-item label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #3a3a3c;
+        }
+        .global-item input, .global-item select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid #c6c6c8;
+            font-size: 0.95rem;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        .modal-buttons button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .debt-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        .debt-table th {
+            background: #e9e9ef;
+            padding: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .debt-table td {
+            padding: 8px;
+            border-bottom: 1px solid #d1d1d6;
+            text-align: center;
+        }
+        .debt-table .positive {
+            color: #d70015;
+        }
+        .debt-table .negative {
+            color: #248a3d;
+        }
+
+        /* 明细表格 */
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+        .detail-table th {
+            background: #e9e9ef;
+            padding: 8px;
+            text-align: center;
+        }
+        .detail-table td {
+            padding: 6px;
+            border-bottom: 1px solid #d1d1d6;
+            text-align: center;
+        }
+
+        /* 管理类别小模态框 */
+        .category-list {
+            list-style: none;
+            margin: 10px 0;
+        }
+        .category-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #e5e5ea;
+        }
+        .category-list li button {
+            padding: 4px 8px;
+            background: #ff3b30;
+            box-shadow: none;
+            font-size: 0.8rem;
+        }
+
+        /* 打印样式：保留颜色，隐藏工具栏等 */
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .container { box-shadow: none; border: none; backdrop-filter: none; background: white; max-width: 100%; padding: 0; }
+            .toolbar, .result-area, .historial-area, .company-header, .subhead, .footer-note, .delete-btn, .sign-btn-camera, button { display: none; }
+            .table-wrapper { border: none; box-shadow: none; background: white; overflow: visible; }
+            table { font-size: 8pt; width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 2px; }
+            .employee-name input { background: white; color: black; border: none; box-shadow: none; }
+            input { border: none; background: white; }
+            /* 保留颜色需要以下设置 */
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @page { size: landscape; margin: 0.5cm; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="company-header">
+        <div class="company-name">
+            <h1>WANYI</h1>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- 本周排名区域（西班牙语） -->
+        <div class="result-area">
+            <div class="result-title">📊 Ranking semanal (Top 3 🏆)</div>
+            <div id="statsContainer" class="stats-grid">
+                    <div class="employee-stat first">
+                        <span class="rank-badge">🏆</span>
+                        <div class="emp-name-badge">Miquel</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 0</span>
+                            <span class="perfect-badge">✨ Perfecta</span>
+                        </div>
+                    </div>
+                
+                    <div class="employee-stat second">
+                        <span class="rank-badge">🥈</span>
+                        <div class="emp-name-badge">Hilary</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 1</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 0</span>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="employee-stat third">
+                        <span class="rank-badge">🥉</span>
+                        <div class="emp-name-badge">Marlen</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 1</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 0</span>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="employee-stat ">
+                        
+                        <div class="emp-name-badge">Melissa</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 1</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 1</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 0</span>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="employee-stat ">
+                        
+                        <div class="emp-name-badge">Angeles</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 2</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 0</span>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="employee-stat ">
+                        
+                        <div class="emp-name-badge">Francisco</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 2</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 0</span>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="employee-stat ">
+                        
+                        <div class="emp-name-badge">Dulce</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 2</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 1</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 0</span>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="employee-stat ">
+                        
+                        <div class="emp-name-badge">Hanny</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 2</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 1</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 0</span>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="employee-stat ">
+                        
+                        <div class="emp-name-badge">Fernanda</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 1</span>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="employee-stat ">
+                        
+                        <div class="emp-name-badge">Adrian</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 1</span>
+                            
+                        </div>
+                    </div>
+                
+                    <div class="employee-stat ">
+                        
+                        <div class="emp-name-badge">Priscila</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> 1</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> 0</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> 1</span>
+                            
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+        <!-- 考勤表格（星期缩写已为西班牙语） -->
+        <div class="table-wrapper">
+            <table id="attendanceTable">
+                <thead>
+                <tr>
+                    <th>Empleado</th>
+                    <th colspan="2">Lun</th>
+                    <th colspan="2">Mar</th>
+                    <th colspan="2">Mié</th>
+                    <th colspan="2">Jue</th>
+                    <th colspan="2">Vie</th>
+                    <th colspan="2">Sáb</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Ent</th><th>Sal</th>
+                    <th class="">Ent</th><th>Sal</th>
+                    <th>Ent</th><th>Sal</th>
+                    <th>Ent</th><th class="highlight-col">Sal</th>
+                    <th>Ent</th><th>Sal</th>
+                    <th>Ent</th><th>Sal</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="tableBody"><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(255, 148, 77);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(255, 148, 77);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 204, 0);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(255, 148, 77);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(255, 148, 77);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr><tr><td class="employee-name"><input type="text" placeholder="Nombre" disabled=""></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled=""><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(255, 102, 102);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td class="highlight-col" style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="E" class="sign-in" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td style="padding: 4px 1px;"><div class="time-cell"><input type="text" placeholder="S" class="sign-out" disabled="" style="background-color: rgb(192, 192, 192);"><button class="sign-btn-camera" title="点击打卡" disabled="">📸</button></div></td><td><button class="delete-btn" title="删除员工（需密码）" style="display: none;">✖</button></td></tr></tbody>
+            </table>
+        </div>
+
+        <!-- 规则介绍（保持中文） -->
+        <div class="subhead">
+            ✅ 迟到规则：&gt; 09:10 <span style="background:#ff6666; padding:2px 8px; border-radius:16px;">红色</span> · &gt; 09:45 <span style="background:#ffcc00; padding:2px 8px; border-radius:16px;">黄色</span><br>
+            ✅ 早退规则：&lt; 17:15 <span style="background:#ff944d; padding:2px 8px; border-radius:16px;">橙色</span><br>
+            🔐 管理员解锁后可编辑姓名/增删员工 · 所有更改自动保存<br>
+            💰 全周无任何打卡记录 → 该员工本周工资为 $0<br>
+            ⏰ 当前时段单元格无背景，仅显示相机图标 · 缺勤格子过了当天12:00（签到）或23:59（签退）不能再补签<br>
+            📅 周六12:00后若未签到即计为缺勤，签退不影响缺勤统计
+        </div>
+
+        <!-- 工具栏（保持中文） -->
+        <div class="toolbar">
+            <div class="toolbar-group">
+                <button id="addRowBtn" class="requires-unlock" title="添加员工（需密码）" disabled="">➕ 添加</button>
+                <button id="calcBtn" class="requires-unlock" title="手动刷新排名" disabled="">📊 统计</button>
+                <button id="saveWeekBtn" class="save-btn requires-unlock" title="手动保存本周到历史（需密码）" disabled="">💾 保存历史</button>
+                <button id="toggleLockBtn" class="icon-btn" title="解锁所有（需密码）">🔒</button>
+                <button id="clearBtn" class="clear-btn requires-unlock" title="清空所有（需密码）" disabled="">🧹 清空</button>
+                <button id="changePwdBtn" class="change-pwd-btn requires-unlock" title="修改密码（需密码）" disabled="">🔐 改密码</button>
+                <button id="nextWeekBtn" class="outline requires-unlock" title="下一周（自动保存当前周）" disabled="">⏩ 下一周</button>
+                <button id="restoreBtn" class="outline requires-unlock" title="从历史记录中选择恢复" disabled="">↩️ 恢复</button>
+            </div>
+            <div class="toolbar-group">
+                <button id="salaryCalcBtn" class="salary-btn requires-unlock" title="工资计算（管理员）" disabled="">💰 工资计算</button>
+                <button id="salaryHistoryBtn" class="salary-history-btn requires-unlock" title="查看工资历史" disabled="">📜 工资单</button>
+                <button id="chartBtn" class="chart-btn requires-unlock" title="月支出图表" disabled="">📊 月支出</button>
+                <button id="debtBtn" class="debt-btn requires-unlock" title="员工欠款管理" disabled="">💸 欠款</button>
+            </div>
+            <div class="toolbar-group">
+                <button id="reportBtn" class="outline requires-unlock" title="生成周报表" disabled="">📄 周报表</button>
+                <button id="monthReportBtn" class="outline requires-unlock" title="生成月报表" disabled="">📅 月报表</button>
+                <button id="yearReportBtn" class="outline requires-unlock" title="生成年报表" disabled="">📆 年报表</button>
+                <button id="customReportBtn" class="outline requires-unlock" title="自定义时间范围" disabled="">⚙️ 自定义</button>
+                <input type="date" id="startDate" value="2026-03-01" style="width:130px; border-radius:40px; padding:8px 12px; border:1px solid rgba(0,122,255,0.3); background:white;">
+                <span style="color:#8e8e93;">至</span>
+                <input type="date" id="endDate" value="2026-03-31" style="width:130px; border-radius:40px; padding:8px 12px; border:1px solid rgba(0,122,255,0.3); background:white;">
+            </div>
+            <div class="toolbar-group">
+                <button id="exportDataBtn" class="outline requires-unlock" title="导出所有数据到文件" disabled="">📤 导出数据</button>
+                <button id="importDataBtn" class="outline requires-unlock" title="从文件导入数据" disabled="">📥 导入数据</button>
+            </div>
+        </div>
+
+        <!-- 历史记录区域（保持中文） -->
+        <div class="historial-area">
+            <div class="historial-titulo">
+                🗂️ 历史周记录
+                <span style="background:rgba(0,122,255,0.1); padding:4px 12px; border-radius:30px; font-size:0.8rem;">点击查看详情 | 删除需密码</span>
+            </div>
+            <div id="historialLista" class="historial-lista"><div class="historial-item" data-id="1777159315514">
+                    <span class="historial-fecha">1. 📅 2026/04/25 17:21</span>
+                    <span class="historial-resumen">11 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div><div class="historial-item" data-id="1777136605449">
+                    <span class="historial-fecha">2. 📅 2026/04/25 11:03</span>
+                    <span class="historial-resumen">11 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div><div class="historial-item" data-id="1776555027979">
+                    <span class="historial-fecha">3. 📅 2026/04/18 17:30</span>
+                    <span class="historial-resumen">11 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div><div class="historial-item" data-id="1776091908580">
+                    <span class="historial-fecha">4. 📅 2026/04/13 08:51</span>
+                    <span class="historial-resumen">11 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div><div class="historial-item" data-id="1775487587820">
+                    <span class="historial-fecha">5. 📅 2026/04/06 08:59</span>
+                    <span class="historial-resumen">11 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div><div class="historial-item" data-id="1774882857525">
+                    <span class="historial-fecha">6. 📅 2026/03/30 09:00</span>
+                    <span class="historial-resumen">11 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div><div class="historial-item" data-id="1774722595053">
+                    <span class="historial-fecha">7. 📅 2026/03/28 12:29</span>
+                    <span class="historial-resumen">11 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div><div class="historial-item" data-id="1774278128912">
+                    <span class="historial-fecha">8. 📅 2026/03/23 09:02</span>
+                    <span class="historial-resumen">11 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div><div class="historial-item" data-id="1773530132262">
+                    <span class="historial-fecha">9. 📅 2026/03/14 17:15</span>
+                    <span class="historial-resumen">12 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div><div class="historial-item" data-id="1772925327484">
+                    <span class="historial-fecha">10. 📅 2026/03/07 17:15</span>
+                    <span class="historial-resumen">12 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div><div class="historial-item" data-id="1772320394795">
+                    <span class="historial-fecha">11. 📅 2026/02/28 17:13</span>
+                    <span class="historial-resumen">12 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div></div>
+            <div class="footer-note">⏱️ 缺勤=空；保存的历史记录不丢失</div>
+        </div>
+    </div>
+</div>
+
+<!-- 工资计算模态框（增加历史周选择） -->
+<div id="salaryCalcModal" class="modal-overlay">
+    <div class="modal salary-modal">
+        <h3>💰 工资计算</h3>
+        <div class="global-section">
+            <div class="global-item" style="flex: 2 1 300px;">
+                <label>选择周</label>
+                <select id="weekSelect" style="width:100%; padding:8px; border-radius:12px; border:1px solid #c6c6c8;"></select>
+            </div>
+            <div class="global-item">
+                <label>全勤奖励 ($)</label>
+                <input type="number" id="perfectBonus" value="50" min="0" step="0.01">
+            </div>
+            <div class="global-item">
+                <label>迟到一次奖励 ($)</label>
+                <input type="number" id="onceLateBonus" value="20" min="0" step="0.01">
+            </div>
+            <div class="global-item">
+                <label>迟到扣除 ($/次，第2次起)</label>
+                <input type="number" id="lateDeduct" value="10" min="0" step="0.01">
+            </div>
+            <div class="global-item">
+                <label>缺勤扣除 ($/天)</label>
+                <input type="number" id="absentDeduct" value="100" min="0" step="0.01">
+            </div>
+        </div>
+
+        <h4 style="margin:16px 0 8px;">员工工资明细</h4>
+        <table class="employee-salary-table" id="salaryEmployeeTable">
+            <thead>
+            <tr><th>姓名</th><th>周薪</th><th>迟到</th><th>早退</th><th>缺勤</th><th>明细</th><th>最终工资</th></tr>
+            </thead>
+            <tbody id="salaryEmployeeBody"></tbody>
+        </table>
+
+        <div class="modal-buttons">
+            <button class="outline" id="cancelSalaryCalcBtn">取消</button>
+            <button class="excel-btn" id="exportExcelBtn">📥 导出Excel</button>
+            <button class="print-btn" id="printSalaryBtn">🖨️ 打印</button>
+            <button id="printSalaryCardsBtn" style="background:#5856d6;">🖼️ 打印工资卡</button>
+            <button id="recalcSalaryBtn" style="background:#007aff;">重新计算</button>
+            <button id="saveSalaryCalcBtn" style="background:#34c759;">保存工资</button>
+        </div>
+    </div>
+</div>
+
+<!-- 工资历史模态框（保持中文，货币符号改为$） -->
+<div id="salaryHistoryModal" class="modal-overlay">
+    <div class="modal" style="width:1000px;">
+        <h3>📜 工资历史记录</h3>
+        <div id="salaryHistoryList" style="max-height:400px; overflow-y:auto;"></div>
+        <div class="modal-buttons">
+            <button class="outline" id="closeSalaryHistoryBtn">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- 月支出图表模态框（保持中文） -->
+<div id="chartModal" class="modal-overlay">
+    <div class="modal" style="width:800px;">
+        <h3>📊 月工资支出统计</h3>
+        <div style="width:100%; height:400px;">
+            <canvas id="monthlyChart"></canvas>
+        </div>
+        <div class="modal-buttons">
+            <button class="outline" id="closeChartBtn">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- 欠款管理模态框（保持中文，货币符号改为$） -->
+<div id="debtModal" class="modal-overlay">
+    <div class="modal debt-modal">
+        <h3>💸 员工欠款管理</h3>
+        <div class="global-section">
+            <div class="global-item">
+                <label>选择员工</label>
+                <select id="debtEmployeeSelect"></select>
+            </div>
+            <div class="global-item">
+                <label>类别</label>
+                <select id="debtCategorySelect"></select>
+            </div>
+            <div class="global-item">
+                <label>金额 ($)</label>
+                <input type="number" id="debtAmount" value="0" min="0" step="0.01">
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
+            <button style="background:#d43f7a;" id="addDebtBtn">➕ 记录欠款</button>
+            <button style="background:#34c759;" id="addPaymentBtn">💵 记录还款</button>
+            <button class="outline" id="manageCategoryBtn">⚙️ 管理类别</button>
+        </div>
+
+        <h4>当前欠款汇总</h4>
+        <table class="debt-table" id="debtSummaryTable">
+            <thead>
+            <tr><th>员工</th><th>总欠款</th><th>已还</th><th>剩余欠款</th></tr>
+            </thead>
+            <tbody id="debtSummaryBody"></tbody>
+        </table>
+
+        <h4 style="margin-top:20px;">详细记录（最近6个月）</h4>
+        <div style="max-height:200px; overflow-y:auto;">
+            <table class="detail-table" id="debtDetailTable">
+                <thead>
+                <tr><th>日期</th><th>类别</th><th>金额</th><th>类型</th></tr>
+                </thead>
+                <tbody id="debtDetailBody"></tbody>
+            </table>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="outline" id="closeDebtBtn">关闭</button>
+        </div>
+    </div>
+</div>
+
+<!-- 管理类别模态框（保持中文） -->
+<div id="categoryModal" class="modal-overlay">
+    <div class="modal category-modal">
+        <h3>⚙️ 管理欠款类别</h3>
+        <ul id="categoryList" class="category-list"></ul>
+        <div style="display: flex; gap: 10px; margin: 20px 0;">
+            <input type="text" id="newCategoryName" placeholder="新类别名称" style="flex:1; padding:8px; border-radius:12px; border:1px solid #c6c6c8;">
+            <button id="addCategoryBtn" style="background:#007aff;">添加</button>
+        </div>
+        <div class="modal-buttons">
+            <button class="outline" id="closeCategoryBtn">关闭</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 密码管理 ----------
+        const PASSWORD_KEY = 'admin_password';
+        if (!localStorage.getItem(PASSWORD_KEY)) {
+            localStorage.setItem(PASSWORD_KEY, 'admin');
+        }
+        function getAdminPassword() {
+            return localStorage.getItem(PASSWORD_KEY) || 'admin';
+        }
+        function solicitarPassword(callback) {
+            const pwd = prompt('请输入管理员密码：');
+            if (pwd === getAdminPassword()) {
+                callback();
+            } else {
+                alert('密码错误，操作已取消。');
+            }
+        }
+
+        // ---------- 工资设置 ----------
+        const SALARY_KEY = 'salary_settings_v6';
+        const EMPLOYEE_SALARY_KEY = 'employee_salaries_v6';
+        const SALARY_HISTORY_KEY = 'salary_history_v6';
+
+        let salarySettings = {
+            perfectBonus: 50,
+            onceLateBonus: 20,
+            lateDeduct: 10,
+            absentDeduct: 100
+        };
+        let employeeSalaries = {};
+        let salaryHistory = [];
+
+        function loadSalarySettings() {
+            const saved = localStorage.getItem(SALARY_KEY);
+            if (saved) {
+                try {
+                    salarySettings = JSON.parse(saved);
+                } catch (e) {}
+            }
+            document.getElementById('perfectBonus').value = salarySettings.perfectBonus;
+            document.getElementById('onceLateBonus').value = salarySettings.onceLateBonus;
+            document.getElementById('lateDeduct').value = salarySettings.lateDeduct;
+            document.getElementById('absentDeduct').value = salarySettings.absentDeduct;
+        }
+        function loadEmployeeSalaries() {
+            const saved = localStorage.getItem(EMPLOYEE_SALARY_KEY);
+            if (saved) {
+                try {
+                    employeeSalaries = JSON.parse(saved);
+                } catch (e) {}
+            }
+        }
+        function saveSalarySettings() {
+            salarySettings = {
+                perfectBonus: parseFloat(document.getElementById('perfectBonus').value) || 0,
+                onceLateBonus: parseFloat(document.getElementById('onceLateBonus').value) || 0,
+                lateDeduct: parseFloat(document.getElementById('lateDeduct').value) || 0,
+                absentDeduct: parseFloat(document.getElementById('absentDeduct').value) || 0
+            };
+            localStorage.setItem(SALARY_KEY, JSON.stringify(salarySettings));
+        }
+        function saveEmployeeSalaries() {
+            localStorage.setItem(EMPLOYEE_SALARY_KEY, JSON.stringify(employeeSalaries));
+        }
+
+        function loadSalaryHistory() {
+            const stored = localStorage.getItem(SALARY_HISTORY_KEY);
+            if (stored) {
+                try {
+                    salaryHistory = JSON.parse(stored);
+                } catch (e) {}
+            }
+        }
+        function saveSalaryHistory() {
+            localStorage.setItem(SALARY_HISTORY_KEY, JSON.stringify(salaryHistory));
+        }
+
+        // 辅助函数
+        function timeToMinutes(timeStr) {
+            if (!timeStr || typeof timeStr !== 'string') return null;
+            const trimmed = timeStr.trim();
+            if (trimmed === '') return null;
+            const parts = trimmed.split(':');
+            if (parts.length !== 2) return null;
+            const h = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10);
+            if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
+            return h * 60 + m;
+        }
+
+        // ========== 新阈值（仅修改此处） ==========
+        const LATE_THRESHOLD_RED = 9 * 60 + 10;     // 09:10 红色线
+        const LATE_THRESHOLD_YELLOW = 9 * 60 + 45;  // 09:45 黄色线
+        const EARLY_THRESHOLD = 17 * 60 + 15;       // 17:15 早退线
+        const SIGNIN_DEADLINE = 12 * 60;
+        const SIGNOUT_DEADLINE = 23 * 60 + 59;
+
+        // 判断整周是否完全无打卡 (新增函数)
+        function isWeekTotallyEmpty(weekData, empIndex) {
+            if (!weekData) {
+                const row = tbodyMain.children[empIndex];
+                if (!row) return true;
+                for (let d = 0; d < 6; d++) {
+                    const inVal = row.children[1 + d*2]?.querySelector('input')?.value || '';
+                    const outVal = row.children[2 + d*2]?.querySelector('input')?.value || '';
+                    if (inVal.trim() || outVal.trim()) return false;
+                }
+                return true;
+            } else {
+                const tiempos = weekData.empleados[empIndex]?.tiempos || [];
+                for (const t of tiempos) {
+                    if ((t.entrada && t.entrada.trim()) || (t.salida && t.salida.trim())) return false;
+                }
+                return true;
+            }
+        }
+
+        // 获取统计数据（迟到计数使用 LATE_THRESHOLD_RED）
+        function getAttendanceStatsFromWeek(weekData) {
+            if (!weekData) {
+                return getCurrentAttendanceStats();
+            }
+            const empleados = weekData.empleados;
+            const stats = [];
+            empleados.forEach(emp => {
+                const name = emp.nombre;
+                let late = 0, early = 0, absent = 0;
+                emp.tiempos.forEach(t => {
+                    const inVal = t.entrada || '';
+                    const outVal = t.salida || '';
+                    if (!inVal.trim() || !outVal.trim()) {
+                        absent++;
+                    } else {
+                        const inMin = timeToMinutes(inVal);
+                        const outMin = timeToMinutes(outVal);
+                        if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                        if (outMin !== null && outMin < EARLY_THRESHOLD) early++;
+                    }
+                });
+                stats.push({ name, late, early, absent });
+            });
+            return stats;
+        }
+
+        function getCurrentAttendanceStats() {
+            const rows = tbodyMain.children;
+            const weekDates = getWeekDates();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const now = new Date();
+
+            const stats = [];
+            for (let r = 0; r < rows.length; r++) {
+                const row = rows[r];
+                const cells = row.children;
+                const nameInput = cells[0]?.querySelector('input');
+                const empName = nameInput ? nameInput.value.trim() : `员工${r+1}`;
+
+                let late = 0, early = 0, absent = 0;
+                for (let d = 0; d < 6; d++) {
+                    const inTd = cells[1 + d*2];
+                    const outTd = cells[2 + d*2];
+                    const inInput = inTd?.querySelector('input');
+                    const outInput = outTd?.querySelector('input');
+                    const inVal = inInput ? inInput.value : '';
+                    const outVal = outInput ? outInput.value : '';
+
+                    const cellDate = new Date(weekDates[d]);
+                    cellDate.setHours(0, 0, 0, 0);
+
+                    if (cellDate < today) {
+                        if (!inVal.trim() || !outVal.trim()) {
+                            absent++;
+                        } else {
+                            const inMin = timeToMinutes(inVal);
+                            const outMin = timeToMinutes(outVal);
+                            if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                            if (outMin !== null && outMin < EARLY_THRESHOLD) early++;
+                        }
+                    }
+                    else if (cellDate.getTime() === today.getTime()) {
+                        const isSaturday = (d === 5);
+                        if (isSaturday) {
+                            const nowHours = now.getHours();
+                            const nowMinutes = now.getMinutes();
+                            const isAfterNoon = (nowHours > 12) || (nowHours === 12 && nowMinutes >= 0);
+                            if (isAfterNoon) {
+                                if (!inVal.trim()) {
+                                    absent++;
+                                } else {
+                                    const inMin = timeToMinutes(inVal);
+                                    if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                                }
+                            } else {
+                                if (inVal.trim()) {
+                                    const inMin = timeToMinutes(inVal);
+                                    if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                                }
+                            }
+                        } else {
+                            if (inVal.trim() && outVal.trim()) {
+                                const inMin = timeToMinutes(inVal);
+                                const outMin = timeToMinutes(outVal);
+                                if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                                if (outMin !== null && outMin < EARLY_THRESHOLD) early++;
+                            }
+                        }
+                    }
+                }
+                stats.push({ name: empName, late, early, absent });
+            }
+            return stats;
+        }
+
+        // 工资计算（支持全周无打卡归零）
+        function calculateSalaryDetail(stat, weeklySalary, fullyEmpty) {
+            if (fullyEmpty) return { total: 0, detail: "⚠️ 全周无任何打卡记录，工资为0" };
+            let total = weeklySalary;
+            let detailParts = [];
+
+            if (stat.absent > 0) {
+                let absentDeduct = stat.absent * salarySettings.absentDeduct;
+                detailParts.push(`缺勤${stat.absent}天 -$${absentDeduct}`);
+                total -= absentDeduct;
+            }
+
+            if (stat.early === 0 && stat.absent === 0) {
+                if (stat.late === 0) {
+                    detailParts.push(`全勤+$${salarySettings.perfectBonus}`);
+                    total += salarySettings.perfectBonus;
+                } else if (stat.late === 1) {
+                    detailParts.push(`迟到1次+$${salarySettings.onceLateBonus}`);
+                    total += salarySettings.onceLateBonus;
+                } else if (stat.late > 1) {
+                    let deduct = (stat.late - 1) * salarySettings.lateDeduct;
+                    detailParts.push(`迟到${stat.late}次，超${stat.late-1}次-$${deduct}`);
+                    total -= deduct;
+                }
+            } else {
+                if (stat.late > 1) {
+                    let deduct = (stat.late - 1) * salarySettings.lateDeduct;
+                    detailParts.push(`迟到${stat.late}次，超${stat.late-1}次-$${deduct}`);
+                    total -= deduct;
+                }
+            }
+
+            let detail = detailParts.join('；');
+            if (detail === '') detail = '无奖励/扣除';
+            total = Math.max(total, 0);
+            return { total, detail };
+        }
+
+        // 渲染工资模态框
+        function renderSalaryModal(weekData = null) {
+            const stats = getAttendanceStatsFromWeek(weekData);
+            const tbody = document.getElementById('salaryEmployeeBody');
+            if (!tbody) return;
+            let html = '';
+            let totalSum = 0;
+            for (let i = 0; i < stats.length; i++) {
+                const stat = stats[i];
+                const weeklySalary = employeeSalaries[stat.name] || 0;
+                const fullyEmpty = isWeekTotallyEmpty(weekData, i);
+                const { total, detail } = calculateSalaryDetail(stat, weeklySalary, fullyEmpty);
+                totalSum += total;
+
+                html += `<tr>
+                    <td>${stat.name}</td>
+                    <td><input type="number" class="weekly-salary-input" data-name="${stat.name}" value="${weeklySalary}" min="0" step="0.01" style="width:90px;"></td>
+                    <td>${stat.late}</td>
+                    <td>${stat.early}</td>
+                    <td>${stat.absent}</td>
+                    <td class="detail-text">${detail}</td>
+                    <td class="final-salary">$${Math.round(total)}</td>
+                </tr>`;
+            }
+            html += `<tr class="total-row">
+                <td colspan="6" style="text-align:right;">总计：</td>
+                <td>$${Math.round(totalSum)}</td>
+            </table>`;
+            tbody.innerHTML = html;
+
+            document.querySelectorAll('.weekly-salary-input').forEach(inp => {
+                inp.addEventListener('input', function() {
+                    const name = this.dataset.name;
+                    const newWeekly = parseFloat(this.value) || 0;
+                    employeeSalaries[name] = newWeekly;
+                    const stats = getAttendanceStatsFromWeek(weekData);
+                    let newTotalSum = 0;
+                    const rows = document.querySelectorAll('#salaryEmployeeBody tr:not(.total-row)');
+                    stats.forEach((stat, index) => {
+                        const weekly = employeeSalaries[stat.name] || 0;
+                        const emptyFlag = isWeekTotallyEmpty(weekData, index);
+                        const { total, detail } = calculateSalaryDetail(stat, weekly, emptyFlag);
+                        const row = rows[index];
+                        if (row) {
+                            row.cells[5].innerText = detail;
+                            row.cells[6].innerText = '$' + Math.round(total);
+                        }
+                        newTotalSum += total;
+                    });
+                    const totalRow = document.querySelector('#salaryEmployeeBody tr.total-row');
+                    if (totalRow) {
+                        totalRow.cells[1].innerText = '$' + Math.round(newTotalSum);
+                    }
+                });
+            });
+        }
+
+        function loadWeekSelect() {
+            const select = document.getElementById('weekSelect');
+            let options = '<option value="current">当前周</option>';
+            historial.slice().reverse().forEach((item, index) => {
+                options += `<option value="${item.id}">${item.fecha} (${item.empleados.length}人)</option>`;
+            });
+            select.innerHTML = options;
+        }
+
+        function openSalaryCalcModal() {
+            loadSalarySettings();
+            loadEmployeeSalaries();
+            loadWeekSelect();
+            document.getElementById('perfectBonus').value = salarySettings.perfectBonus;
+            document.getElementById('onceLateBonus').value = salarySettings.onceLateBonus;
+            document.getElementById('lateDeduct').value = salarySettings.lateDeduct;
+            document.getElementById('absentDeduct').value = salarySettings.absentDeduct;
+
+            renderSalaryModal(null);
+            document.getElementById('salaryCalcModal').style.display = 'flex';
+
+            document.getElementById('weekSelect').onchange = function() {
+                const selectedId = this.value;
+                if (selectedId === 'current') {
+                    renderSalaryModal(null);
+                } else {
+                    const weekData = historial.find(h => h.id == selectedId);
+                    if (weekData) {
+                        renderSalaryModal(weekData);
+                    }
+                }
+            };
+        }
+
+        function closeSalaryCalcModal() {
+            document.getElementById('salaryCalcModal').style.display = 'none';
+        }
+
+        // 工资历史
+        function openSalaryHistoryModal() {
+            loadSalaryHistory();
+            const container = document.getElementById('salaryHistoryList');
+            if (salaryHistory.length === 0) {
+                container.innerHTML = '<p style="padding:20px; text-align:center; color:#8e8e93;">暂无工资历史</p>';
+            } else {
+                let html = '';
+                salaryHistory.slice().reverse().forEach(item => {
+                    html += `<div style="background:#f2f2f7; border-radius:16px; padding:12px; margin-bottom:10px;" data-id="${item.id}">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom:8px;">
+                            <span style="font-weight:600;">📅 ${item.date} (${item.week || '当前周'})</span>
+                            <button class="delete-salary-history-btn" data-id="${item.id}" style="background:none; border:none; color:#ff3b30; font-size:1.2rem; cursor:pointer;">🗑️</button>
+                        </div>
+                        <table style="width:100%; font-size:0.8rem; border-collapse:collapse;">
+                            <thead><tr><th>姓名</th><th>周薪</th><th>迟到</th><th>早退</th><th>缺勤</th><th>明细</th><th>工资</th></tr></thead>
+                            <tbody>`;
+                    let totalSum = 0;
+                    item.employees.forEach(emp => {
+                        html += `<tr>
+                            <td>${emp.name}</td>
+                            <td>${emp.weekly}</td>
+                            <td>${emp.late}</td>
+                            <td>${emp.early}</td>
+                            <td>${emp.absent}</td>
+                            <td>${emp.detail}</td>
+                            <td>$${Math.round(emp.total)}</td>
+                        </tr>`;
+                        totalSum += emp.total;
+                    });
+                    html += `<tr style="font-weight:700; background:#e9e9ef;"><td colspan="6" style="text-align:right;">总计：</td><td>$${Math.round(totalSum)}</td></tr>`;
+                    html += `</tbody></table></div>`;
+                });
+                container.innerHTML = html;
+
+                document.querySelectorAll('.delete-salary-history-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const id = Number(this.dataset.id);
+                        solicitarPassword(() => {
+                            if (confirm('确定删除该条工资历史记录？')) {
+                                salaryHistory = salaryHistory.filter(item => item.id !== id);
+                                saveSalaryHistory();
+                                openSalaryHistoryModal();
+                            }
+                        });
+                    });
+                });
+            }
+            document.getElementById('salaryHistoryModal').style.display = 'flex';
+        }
+
+        function closeSalaryHistoryModal() {
+            document.getElementById('salaryHistoryModal').style.display = 'none';
+        }
+
+        // 月支出图表
+        let chartInstance = null;
+        function openChartModal() {
+            loadSalaryHistory();
+            const months = {};
+            const today = new Date();
+            const labels = [];
+            const data = [];
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                labels.push(key);
+                months[key] = 0;
+            }
+            salaryHistory.forEach(item => {
+                const match = item.date.match(/(\d{4})\/(\d{2})\/\d{2}/);
+                if (match) {
+                    const year = match[1];
+                    const month = match[2];
+                    const key = `${year}-${month}`;
+                    if (months.hasOwnProperty(key)) {
+                        const total = item.employees.reduce((sum, emp) => sum + emp.total, 0);
+                        months[key] += total;
+                    }
+                }
+            });
+            labels.forEach(label => {
+                data.push(months[label] || 0);
+            });
+
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '月工资支出 ($)',
+                        data: data,
+                        backgroundColor: 'rgba(0,122,255,0.6)',
+                        borderColor: 'rgba(0,122,255,1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            document.getElementById('chartModal').style.display = 'flex';
+        }
+        function closeChartModal() {
+            document.getElementById('chartModal').style.display = 'none';
+        }
+
+        // 欠款管理（完整保留）
+        const DEBT_KEY = 'employee_debts_v2';
+        const CATEGORY_KEY = 'debt_categories';
+        const defaultCategories = ['借款', '还款', '购买货物', '其他'];
+        let debts = {};
+        let categories = [];
+
+        function loadDebts() {
+            const stored = localStorage.getItem(DEBT_KEY);
+            if (stored) {
+                try {
+                    debts = JSON.parse(stored);
+                } catch (e) {}
+            } else {
+                debts = {};
+            }
+        }
+        function loadCategories() {
+            const stored = localStorage.getItem(CATEGORY_KEY);
+            if (stored) {
+                try {
+                    categories = JSON.parse(stored);
+                } catch (e) {}
+            } else {
+                categories = [...defaultCategories];
+            }
+            if (categories.length === 0) categories = ['借款'];
+        }
+        function saveDebts() {
+            localStorage.setItem(DEBT_KEY, JSON.stringify(debts));
+        }
+        function saveCategories() {
+            localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories));
+        }
+        function isWithinLast6Months(dateStr) {
+            const recordDate = new Date(dateStr);
+            if (isNaN(recordDate.getTime())) return false;
+            const now = new Date();
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(now.getMonth() - 6);
+            return recordDate >= sixMonthsAgo;
+        }
+        function refreshDebtModal() {
+            const select = document.getElementById('debtEmployeeSelect');
+            const categorySelect = document.getElementById('debtCategorySelect');
+            const summaryBody = document.getElementById('debtSummaryBody');
+            const detailBody = document.getElementById('debtDetailBody');
+            if (!select || !categorySelect || !summaryBody || !detailBody) return;
+
+            const rows = tbodyMain.children;
+            const employeeNames = [];
+            for (let r = 0; r < rows.length; r++) {
+                const nameInput = rows[r].children[0]?.querySelector('input');
+                if (nameInput && nameInput.value.trim()) {
+                    employeeNames.push(nameInput.value.trim());
+                }
+            }
+
+            let options = '<option value="">选择员工</option>';
+            employeeNames.forEach(name => {
+                options += `<option value="${name}">${name}</option>`;
+            });
+            select.innerHTML = options;
+
+            let catOptions = '';
+            categories.forEach(cat => {
+                catOptions += `<option value="${cat}">${cat}</option>`;
+            });
+            categorySelect.innerHTML = catOptions;
+
+            let summaryHtml = '';
+            employeeNames.forEach(name => {
+                const debtData = debts[name] || { records: [] };
+                let totalDebt = 0, totalPaid = 0;
+                debtData.records.forEach(r => {
+                    if (r.category === '还款') {
+                        totalPaid += r.amount;
+                    } else {
+                        totalDebt += r.amount;
+                    }
+                });
+                const remaining = totalDebt - totalPaid;
+                const colorClass = remaining > 0 ? 'positive' : (remaining < 0 ? 'negative' : '');
+                summaryHtml += `<tr>
+                    <td>${name}</td>
+                    <td>$${totalDebt.toFixed(2)}</td>
+                    <td>$${totalPaid.toFixed(2)}</td>
+                    <td class="${colorClass}">$${remaining.toFixed(2)}</td>
+                </tr>`;
+            });
+            summaryBody.innerHTML = summaryHtml;
+
+            select.onchange = function() {
+                const selected = this.value;
+                if (!selected) {
+                    detailBody.innerHTML = '';
+                    return;
+                }
+                const debtData = debts[selected] || { records: [] };
+                const records = debtData.records.slice().sort((a,b) => new Date(b.date) - new Date(a.date));
+                const recentRecords = records.filter(r => isWithinLast6Months(r.date));
+                let detailHtml = '';
+                recentRecords.forEach(r => {
+                    const type = (r.category === '还款') ? '还款' : '欠款';
+                    detailHtml += `<tr>
+                        <td>${r.date}</td>
+                        <td>${r.category}</td>
+                        <td>$${r.amount.toFixed(2)}</td>
+                        <td>${type}</td>
+                    </tr>`;
+                });
+                detailBody.innerHTML = detailHtml || '<tr><td colspan="4">最近6个月无记录</td></tr>';
+            };
+        }
+        function addDebt() {
+            const employee = document.getElementById('debtEmployeeSelect').value;
+            const category = document.getElementById('debtCategorySelect').value;
+            const amount = parseFloat(document.getElementById('debtAmount').value);
+            if (!employee) { alert('请选择员工'); return; }
+            if (!category) { alert('请选择类别'); return; }
+            if (isNaN(amount) || amount <= 0) { alert('请输入有效的正数金额'); return; }
+            if (!debts[employee]) { debts[employee] = { records: [] }; }
+            debts[employee].records.push({ category: category, amount: amount, date: new Date().toLocaleDateString('zh-CN') });
+            saveDebts();
+            refreshDebtModal();
+            document.getElementById('debtAmount').value = '';
+            document.getElementById('debtEmployeeSelect').dispatchEvent(new Event('change'));
+        }
+        function addPayment() {
+            const employee = document.getElementById('debtEmployeeSelect').value;
+            const category = document.getElementById('debtCategorySelect').value;
+            const amount = parseFloat(document.getElementById('debtAmount').value);
+            if (!employee) { alert('请选择员工'); return; }
+            if (!category) { alert('请选择类别'); return; }
+            if (isNaN(amount) || amount <= 0) { alert('请输入有效的正数金额'); return; }
+            if (!debts[employee]) { debts[employee] = { records: [] }; }
+            debts[employee].records.push({ category: category, amount: amount, date: new Date().toLocaleDateString('zh-CN') });
+            saveDebts();
+            refreshDebtModal();
+            document.getElementById('debtAmount').value = '';
+            document.getElementById('debtEmployeeSelect').dispatchEvent(new Event('change'));
+        }
+        function openCategoryModal() {
+            renderCategoryList();
+            document.getElementById('categoryModal').style.display = 'flex';
+        }
+        function closeCategoryModal() {
+            document.getElementById('categoryModal').style.display = 'none';
+        }
+        function renderCategoryList() {
+            const list = document.getElementById('categoryList');
+            let html = '';
+            categories.forEach(cat => {
+                let used = false;
+                for (let emp in debts) {
+                    if (debts[emp].records.some(r => r.category === cat)) {
+                        used = true;
+                        break;
+                    }
+                }
+                html += `<li>
+                    <span>${cat}</span>
+                    <button ${used ? 'disabled title="该类别已被使用，无法删除"' : ''} onclick="deleteCategory('${cat}')">删除</button>
+                </li>`;
+            });
+            list.innerHTML = html;
+        }
+        window.deleteCategory = function(cat) {
+            if (confirm(`确定删除类别 "${cat}" 吗？`)) {
+                categories = categories.filter(c => c !== cat);
+                saveCategories();
+                renderCategoryList();
+                refreshDebtModal();
+            }
+        };
+        function openDebtModal() {
+            loadDebts();
+            loadCategories();
+            refreshDebtModal();
+            document.getElementById('debtModal').style.display = 'flex';
+        }
+        function closeDebtModal() {
+            document.getElementById('debtModal').style.display = 'none';
+        }
+
+        // ========== 考勤表格核心操作 ==========
+        const tbodyMain = document.getElementById('tableBody');
+        let historial = [];
+        const MAX_EMPLOYEES = 20;
+        const CURRENT_WEEK_KEY = 'current_week_data';
+
+        function capturarEstadoSemana() {
+            const rows = tbodyMain.children;
+            const empleados = [];
+            for (let r = 0; r < rows.length; r++) {
+                const row = rows[r];
+                const cells = row.children;
+                const nameInput = cells[0]?.querySelector('input');
+                const nombre = nameInput ? nameInput.value.trim() || `Empleado ${r+1}` : `Empleado ${r+1}`;
+                const tiempos = [];
+                for (let d = 0; d < 6; d++) {
+                    const inTd = cells[1 + d*2];
+                    const outTd = cells[2 + d*2];
+                    const inInput = inTd?.querySelector('input');
+                    const outInput = outTd?.querySelector('input');
+                    tiempos.push({
+                        entrada: inInput ? inInput.value : '',
+                        salida: outInput ? outInput.value : '',
+                        bloqueadoEntrada: inInput ? inInput.disabled : false,
+                        bloqueadoSalida: outInput ? outInput.disabled : false
+                    });
+                }
+                empleados.push({ nombre, tiempos });
+            }
+            return empleados;
+        }
+        function guardarSemanaActual() {
+            const estado = capturarEstadoSemana();
+            localStorage.setItem(CURRENT_WEEK_KEY, JSON.stringify(estado));
+        }
+        function restaurarSemana(empleados) {
+            while (tbodyMain.firstChild) tbodyMain.removeChild(tbodyMain.firstChild);
+            empleados.forEach(emp => {
+                tbodyMain.appendChild(createEmployeeRow(emp.nombre));
+            });
+            const rows = tbodyMain.children;
+            for (let r = 0; r < empleados.length; r++) {
+                const emp = empleados[r];
+                const row = rows[r];
+                const cells = row.children;
+                for (let d = 0; d < 6; d++) {
+                    const inTd = cells[1 + d*2];
+                    const outTd = cells[2 + d*2];
+                    const inInput = inTd?.querySelector('input');
+                    const outInput = outTd?.querySelector('input');
+                    if (inInput) {
+                        inInput.value = emp.tiempos[d].entrada || '';
+                        inInput.disabled = emp.tiempos[d].bloqueadoEntrada || false;
+                    }
+                    if (outInput) {
+                        outInput.value = emp.tiempos[d].salida || '';
+                        outInput.disabled = emp.tiempos[d].bloqueadoSalida || false;
+                    }
+                }
+            }
+            const allTimeInputs = document.querySelectorAll('#attendanceTable input[type=text]');
+            const timeInputs = Array.from(allTimeInputs).filter(inp => inp.placeholder !== 'Nombre' && inp.placeholder !== 'Empleado' && !inp.placeholder.includes('Nombre'));
+            const allLocked = timeInputs.length > 0 && timeInputs.every(inp => inp.disabled);
+            document.querySelectorAll('.employee-name input').forEach(inp => inp.disabled = allLocked);
+
+            actualizarColores();
+            actualizarBotonLock();
+            actualizarEstadisticas();
+            actualizarBotonesPorEstado();
+            resaltarColumnaActual();
+        }
+
+        function getCurrentTimeString() {
+            const now = new Date();
+            return `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+        }
+        function getWeekDates() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            let mondayDate;
+            if (dayOfWeek === 0) {
+                mondayDate = new Date(today);
+                mondayDate.setDate(today.getDate() - 6);
+            } else {
+                mondayDate = new Date(today);
+                mondayDate.setDate(today.getDate() - (dayOfWeek - 1));
+            }
+            const weekDates = [];
+            for (let i = 0; i < 6; i++) {
+                const d = new Date(mondayDate);
+                d.setDate(mondayDate.getDate() + i);
+                weekDates.push(d);
+            }
+            return weekDates;
+        }
+
+        function puedeSuplir(dayIndex, isSignIn) {
+            const weekDates = getWeekDates();
+            const cellDate = weekDates[dayIndex];
+            const today = new Date();
+            const cellDateStr = cellDate.toDateString();
+            const todayStr = today.toDateString();
+
+            if (cellDateStr < todayStr) return false;
+            if (cellDateStr > todayStr) return false;
+
+            const nowMinutes = today.getHours() * 60 + today.getMinutes();
+            if (isSignIn) {
+                return nowMinutes <= SIGNIN_DEADLINE;
+            } else {
+                return nowMinutes <= SIGNOUT_DEADLINE;
+            }
+        }
+
+        // 颜色更新（红/黄/橙）
+        function actualizarColores() {
+            for (let row of tbodyMain.children) {
+                for (let d = 0; d < 6; d++) {
+                    const inTd = row.children[1 + d*2];
+                    const outTd = row.children[2 + d*2];
+                    const inInput = inTd?.querySelector('input');
+                    const outInput = outTd?.querySelector('input');
+
+                    if (inInput) {
+                        const val = inInput.value;
+                        if (!val.trim()) {
+                            inInput.style.backgroundColor = '#c0c0c0';
+                        } else {
+                            const min = timeToMinutes(val);
+                            if (min !== null && min > LATE_THRESHOLD_YELLOW) {
+                                inInput.style.backgroundColor = '#ffcc00';
+                            } else if (min !== null && min > LATE_THRESHOLD_RED) {
+                                inInput.style.backgroundColor = '#ff6666';
+                            } else {
+                                inInput.style.backgroundColor = '';
+                            }
+                        }
+                    }
+                    if (outInput) {
+                        const val = outInput.value;
+                        if (!val.trim()) {
+                            outInput.style.backgroundColor = '#c0c0c0';
+                        } else {
+                            const min = timeToMinutes(val);
+                            if (min !== null && min < EARLY_THRESHOLD) {
+                                outInput.style.backgroundColor = '#ff944d';
+                            } else {
+                                outInput.style.backgroundColor = '';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function resaltarColumnaActual() {
+            document.querySelectorAll('.highlight-col').forEach(el => el.classList.remove('highlight-col'));
+            const now = new Date();
+            const day = now.getDay();
+            if (day === 0) return;
+            const colIndex = day - 1;
+            if (colIndex < 0 || colIndex > 5) return;
+            const hour = now.getHours();
+            const isMorning = hour < 12;
+            const targetCol = isMorning ? 1 + colIndex*2 : 2 + colIndex*2;
+
+            const rows = tbodyMain.children;
+            for (let r = 0; r < rows.length; r++) {
+                const cells = rows[r].children;
+                if (cells.length > targetCol) {
+                    cells[targetCol].classList.add('highlight-col');
+                }
+            }
+            const headerCells = document.querySelectorAll('#attendanceTable thead tr:last-child th');
+            if (headerCells.length > targetCol) {
+                headerCells[targetCol].classList.add('highlight-col');
+            }
+        }
+
+        function actualizarBotonesPorEstado() {
+            const rows = tbodyMain.children;
+            for (let r = 0; r < rows.length; r++) {
+                const cells = rows[r].children;
+                for (let d = 0; d < 6; d++) {
+                    const inTd = cells[1 + d*2];
+                    const outTd = cells[2 + d*2];
+                    const inBtn = inTd?.querySelector('.sign-btn-camera');
+                    const outBtn = outTd?.querySelector('.sign-btn-camera');
+                    const inInput = inTd?.querySelector('input');
+                    const outInput = outTd?.querySelector('input');
+
+                    if (inBtn && inInput) {
+                        if (inInput.value.trim() !== '' && inInput.disabled) {
+                            inBtn.disabled = true;
+                        } else {
+                            if (inInput.disabled) {
+                                inBtn.disabled = !puedeSuplir(d, true);
+                            } else {
+                                inBtn.disabled = false;
+                            }
+                        }
+                    }
+                    if (outBtn && outInput) {
+                        if (outInput.value.trim() !== '' && outInput.disabled) {
+                            outBtn.disabled = true;
+                        } else {
+                            if (outInput.disabled) {
+                                outBtn.disabled = !puedeSuplir(d, false);
+                            } else {
+                                outBtn.disabled = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function actualizarBotonLock() {
+            const allTimeInputs = document.querySelectorAll('#attendanceTable input[type=text]');
+            const timeInputs = Array.from(allTimeInputs).filter(inp => inp.placeholder !== 'Nombre' && inp.placeholder !== 'Empleado' && !inp.placeholder.includes('Nombre'));
+            const allLocked = timeInputs.length > 0 && timeInputs.every(inp => inp.disabled);
+            if (allLocked) {
+                document.getElementById('toggleLockBtn').innerHTML = '🔒';
+                document.getElementById('toggleLockBtn').title = '解锁所有（需密码）';
+                document.querySelectorAll('#attendanceTable .delete-btn').forEach(btn => btn.style.display = 'none');
+                document.querySelectorAll('.requires-unlock').forEach(btn => btn.disabled = true);
+            } else {
+                document.getElementById('toggleLockBtn').innerHTML = '🔓';
+                document.getElementById('toggleLockBtn').title = '锁定所有';
+                document.querySelectorAll('#attendanceTable .delete-btn').forEach(btn => btn.style.display = 'inline-block');
+                document.querySelectorAll('.requires-unlock').forEach(btn => btn.disabled = false);
+            }
+        }
+        function toggleLock() {
+            const allTimeInputs = document.querySelectorAll('#attendanceTable input[type=text]');
+            const timeInputs = Array.from(allTimeInputs).filter(inp => inp.placeholder !== 'Nombre' && inp.placeholder !== 'Empleado' && !inp.placeholder.includes('Nombre'));
+            const allLocked = timeInputs.length > 0 && timeInputs.every(inp => inp.disabled);
+
+            if (allLocked) {
+                solicitarPassword(() => {
+                    timeInputs.forEach(inp => inp.disabled = false);
+                    document.querySelectorAll('.employee-name input').forEach(inp => inp.disabled = false);
+                    actualizarBotonLock();
+                    guardarSemanaActual();
+                    actualizarBotonesPorEstado();
+                });
+            } else {
+                timeInputs.forEach(inp => inp.disabled = true);
+                document.querySelectorAll('.employee-name input').forEach(inp => inp.disabled = true);
+                actualizarBotonLock();
+                guardarSemanaActual();
+                actualizarBotonesPorEstado();
+            }
+        }
+
+        function createEmployeeRow(name = '') {
+            const tr = document.createElement('tr');
+            const tdName = document.createElement('td');
+            tdName.className = 'employee-name';
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.placeholder = 'Nombre';
+            nameInput.value = name;
+            nameInput.disabled = true;
+            nameInput.addEventListener('input', () => { guardarSemanaActual(); actualizarEstadisticas(); });
+            nameInput.addEventListener('blur', () => { guardarSemanaActual(); actualizarEstadisticas(); });
+            tdName.appendChild(nameInput);
+            tr.appendChild(tdName);
+
+            for (let day = 0; day < 6; day++) {
+                const tdIn = document.createElement('td');
+                tdIn.style.padding = '4px 1px';
+                const divIn = document.createElement('div');
+                divIn.className = 'time-cell';
+                const inInput = document.createElement('input');
+                inInput.type = 'text';
+                inInput.placeholder = 'E';
+                inInput.classList.add('sign-in');
+                inInput.disabled = true;
+                inInput.addEventListener('blur', () => {
+                    actualizarColores();
+                    actualizarEstadisticas();
+                    guardarSemanaActual();
+                    actualizarBotonesPorEstado();
+                });
+                const inBtn = document.createElement('button');
+                inBtn.innerHTML = '📸';
+                inBtn.className = 'sign-btn-camera';
+                inBtn.setAttribute('title', '点击打卡');
+                inBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (inBtn.disabled) return;
+                    inInput.disabled = false;
+                    inInput.value = getCurrentTimeString();
+                    inInput.disabled = true;
+                    actualizarColores();
+                    actualizarBotonLock();
+                    actualizarEstadisticas();
+                    guardarSemanaActual();
+                    actualizarBotonesPorEstado();
+                });
+                divIn.appendChild(inInput);
+                divIn.appendChild(inBtn);
+                tdIn.appendChild(divIn);
+                tr.appendChild(tdIn);
+
+                const tdOut = document.createElement('td');
+                tdOut.style.padding = '4px 1px';
+                const divOut = document.createElement('div');
+                divOut.className = 'time-cell';
+                const outInput = document.createElement('input');
+                outInput.type = 'text';
+                outInput.placeholder = 'S';
+                outInput.classList.add('sign-out');
+                outInput.disabled = true;
+                outInput.addEventListener('blur', () => {
+                    actualizarColores();
+                    actualizarEstadisticas();
+                    guardarSemanaActual();
+                    actualizarBotonesPorEstado();
+                });
+                const outBtn = document.createElement('button');
+                outBtn.innerHTML = '📸';
+                outBtn.className = 'sign-btn-camera';
+                outBtn.setAttribute('title', '点击打卡');
+                outBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (outBtn.disabled) return;
+                    outInput.disabled = false;
+                    outInput.value = getCurrentTimeString();
+                    outInput.disabled = true;
+                    actualizarColores();
+                    actualizarBotonLock();
+                    actualizarEstadisticas();
+                    guardarSemanaActual();
+                    actualizarBotonesPorEstado();
+                });
+                divOut.appendChild(outInput);
+                divOut.appendChild(outBtn);
+                tdOut.appendChild(divOut);
+                tr.appendChild(tdOut);
+            }
+
+            const tdDel = document.createElement('td');
+            const delBtn = document.createElement('button');
+            delBtn.innerHTML = '✖';
+            delBtn.className = 'delete-btn';
+            delBtn.setAttribute('title', '删除员工（需密码）');
+            delBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                solicitarPassword(() => {
+                    if (tbodyMain.children.length > 1) {
+                        tr.remove();
+                        actualizarColores();
+                        actualizarBotonLock();
+                        actualizarEstadisticas();
+                        guardarSemanaActual();
+                        actualizarBotonesPorEstado();
+                        resaltarColumnaActual();
+                    } else {
+                        alert('至少需要保留一名员工');
+                    }
+                });
+            });
+            tdDel.appendChild(delBtn);
+            tr.appendChild(tdDel);
+            return tr;
+        }
+
+        function actualizarEstadisticas() {
+            const rows = tbodyMain.children;
+            const weekDates = getWeekDates();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const now = new Date();
+
+            const results = [];
+            for (let r = 0; r < rows.length; r++) {
+                const row = rows[r];
+                const cells = row.children;
+                const nameInput = cells[0]?.querySelector('input');
+                const empName = nameInput ? (nameInput.value.trim() || `员工${r+1}`) : `员工${r+1}`;
+
+                let late = 0, early = 0, absent = 0;
+                for (let d = 0; d < 6; d++) {
+                    const inTd = cells[1 + d*2];
+                    const outTd = cells[2 + d*2];
+                    const inInput = inTd?.querySelector('input');
+                    const outInput = outTd?.querySelector('input');
+                    const inVal = inInput ? inInput.value : '';
+                    const outVal = outInput ? outInput.value : '';
+
+                    const cellDate = new Date(weekDates[d]);
+                    cellDate.setHours(0, 0, 0, 0);
+
+                    if (cellDate < today) {
+                        if (!inVal.trim() || !outVal.trim()) {
+                            absent++;
+                        } else {
+                            const inMin = timeToMinutes(inVal);
+                            const outMin = timeToMinutes(outVal);
+                            if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                            if (outMin !== null && outMin < EARLY_THRESHOLD) early++;
+                        }
+                    }
+                    else if (cellDate.getTime() === today.getTime()) {
+                        const isSaturday = (d === 5);
+                        if (isSaturday) {
+                            const nowHours = now.getHours();
+                            const nowMinutes = now.getMinutes();
+                            const isAfterNoon = (nowHours > 12) || (nowHours === 12 && nowMinutes >= 0);
+                            if (isAfterNoon) {
+                                if (!inVal.trim()) {
+                                    absent++;
+                                } else {
+                                    const inMin = timeToMinutes(inVal);
+                                    if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                                }
+                            } else {
+                                if (inVal.trim()) {
+                                    const inMin = timeToMinutes(inVal);
+                                    if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                                }
+                            }
+                        } else {
+                            if (inVal.trim() && outVal.trim()) {
+                                const inMin = timeToMinutes(inVal);
+                                const outMin = timeToMinutes(outVal);
+                                if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                                if (outMin !== null && outMin < EARLY_THRESHOLD) early++;
+                            }
+                        }
+                    }
+                }
+                results.push({ name: empName, late, early, absent, perfect: (late===0 && early===0 && absent===0) });
+            }
+            results.sort((a,b) => {
+                if (a.absent !== b.absent) return a.absent - b.absent;
+                if (a.late !== b.late) return a.late - b.late;
+                return a.early - b.early;
+            });
+            renderEstadisticas(results);
+        }
+
+        function renderEstadisticas(results) {
+            const container = document.getElementById('statsContainer');
+            if (results.length === 0) {
+                container.innerHTML = '<div style="color:#8e8e93; padding:10px;">暂无员工</div>';
+                return;
+            }
+            let html = '';
+            results.forEach((r, index) => {
+                const badge = r.perfect ? '<span class="perfect-badge">✨ Perfecta</span>' : '';
+                let rankClass = '';
+                let rankIcon = '';
+                if (index === 0) {
+                    rankClass = 'first';
+                    rankIcon = '<span class="rank-badge">🏆</span>';
+                } else if (index === 1) {
+                    rankClass = 'second';
+                    rankIcon = '<span class="rank-badge">🥈</span>';
+                } else if (index === 2) {
+                    rankClass = 'third';
+                    rankIcon = '<span class="rank-badge">🥉</span>';
+                }
+                html += `
+                    <div class="employee-stat ${rankClass}">
+                        ${rankIcon}
+                        <div class="emp-name-badge">${r.name}</div>
+                        <div class="stat-detail">
+                            <span class="stat-item"><span class="stat-label">Retraso</span> ${r.late}</span>
+                            <span class="stat-item"><span class="stat-label">Salida temp.</span> ${r.early}</span>
+                            <span class="stat-item"><span class="stat-label">Ausencia</span> ${r.absent}</span>
+                            ${badge}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // 历史记录
+        function cargarHistorial() {
+            const stored = localStorage.getItem('attendance_historial');
+            if (stored) {
+                try { historial = JSON.parse(stored); } catch(e){ historial = []; }
+            } else {
+                historial = [];
+            }
+            renderHistorial();
+        }
+        function guardarHistorial() {
+            localStorage.setItem('attendance_historial', JSON.stringify(historial));
+        }
+        function renderHistorial() {
+            const lista = document.getElementById('historialLista');
+            if (historial.length === 0) {
+                lista.innerHTML = '<div style="color:#8e8e93; padding:10px; text-align:center;">暂无保存的记录</div>';
+                return;
+            }
+            const sorted = [...historial].reverse();
+            let html = '';
+            sorted.forEach((item, idx) => {
+                html += `<div class="historial-item" data-id="${item.id}">
+                    <span class="historial-fecha">${idx+1}. 📅 ${item.fecha}</span>
+                    <span class="historial-resumen">${item.empleados.length} 人</span>
+                    <button class="delete-history-btn" title="删除此记录（需密码）">🗑️</button>
+                </div>`;
+            });
+            lista.innerHTML = html;
+
+            document.querySelectorAll('.historial-item').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('delete-history-btn')) return;
+                    const id = Number(this.dataset.id);
+                    const semana = historial.find(h => h.id === id);
+                    if (semana) mostrarHistorialEnVentana(semana);
+                });
+            });
+
+            document.querySelectorAll('.delete-history-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const item = this.closest('.historial-item');
+                    const id = Number(item.dataset.id);
+                    solicitarPassword(() => {
+                        if (confirm('确定要删除这条历史记录吗？')) {
+                            historial = historial.filter(h => h.id !== id);
+                            guardarHistorial();
+                            renderHistorial();
+                        }
+                    });
+                });
+            });
+        }
+
+        function mostrarHistorialEnVentana(semana) {
+            const win = window.open('', '_blank');
+            if (!win) { alert('浏览器阻止了弹窗，请允许后再试。'); return; }
+            const fecha = semana.fecha;
+            const empleados = semana.empleados;
+
+            const results = [];
+            empleados.forEach(emp => {
+                let late = 0, early = 0, absent = 0;
+                emp.tiempos.forEach(t => {
+                    const inVal = t.entrada || '';
+                    const outVal = t.salida || '';
+                    if (!inVal.trim() || !outVal.trim()) {
+                        absent++;
+                    } else {
+                        const inMin = timeToMinutes(inVal);
+                        const outMin = timeToMinutes(outVal);
+                        if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                        if (outMin !== null && outMin < EARLY_THRESHOLD) early++;
+                    }
+                });
+                results.push({ name: emp.nombre, late, early, absent, perfect: (late===0 && early===0 && absent===0) });
+            });
+            results.sort((a,b) => {
+                if (a.absent !== b.absent) return a.absent - b.absent;
+                if (a.late !== b.late) return a.late - b.late;
+                return a.early - b.early;
+            });
+
+            let html = `
+                <!DOCTYPE html>
+                <html>
+                <head><meta charset="UTF-8"><title>历史周记录 - ${fecha}</title>
+                <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f2f2f7; padding:20px; }
+                    .container { max-width:1200px; margin:0 auto; background:white; border-radius:24px; padding:20px; box-shadow:0 10px 20px rgba(0,0,0,0.1); }
+                    h2 { color:#1c1c1e; border-left:5px solid #007aff; padding-left:15px; }
+                    .section-title { font-weight:600; font-size:1.2rem; margin:25px 0 15px 0; color:#1c1c1e; }
+                    table { width:100%; border-collapse: collapse; margin-top:15px; }
+                    th { background:#f2f2f7; color:#1c1c1e; padding:10px; border-bottom:1px solid #c6c6c8; }
+                    td { padding:8px; border-bottom:1px solid #e5e5ea; text-align:center; }
+                    .rank-icon { font-size:1.2rem; }
+                    .perfect { background: #34c759; color: white; padding:2px 8px; border-radius:20px; display:inline-block; }
+                    .footer { margin-top:20px; color:#8e8e93; text-align:center; }
+                    .entrada, .salida { font-family: monospace; padding:2px 5px; border-radius:12px; }
+                </style>
+                <script>
+                    function timeToMinutes(t) {
+                        if(!t||typeof t!='string')return null;
+                        let s=t.trim(); if(s==='')return null;
+                        let p=s.split(':'); if(p.length!==2)return null;
+                        let h=parseInt(p[0],10), m=parseInt(p[1],10);
+                        if(isNaN(h)||isNaN(m)||h<0||h>23||m<0||m>59)return null;
+                        return h*60+m;
+                    }
+                    const LATE_RED=9*60+10, LATE_YELLOW=9*60+45, EARLY=17*60+15;
+                    window.onload = function() {
+                        document.querySelectorAll('.entrada, .salida').forEach(el => {
+                            let val = el.innerText.trim();
+                            if(val === '--:--') {
+                                el.style.backgroundColor = '#c0c0c0';
+                                return;
+                            }
+                            let mins = timeToMinutes(val);
+                            if(mins === null) return;
+                            if(el.classList.contains('entrada')) {
+                                if(mins > LATE_YELLOW) el.style.backgroundColor = '#ffcc00';
+                                else if(mins > LATE_RED) el.style.backgroundColor = '#ff6666';
+                            }
+                            if(el.classList.contains('salida') && mins < EARLY) {
+                                el.style.backgroundColor = '#ff944d';
+                            }
+                        });
+                    };
+                <\/script>
+                </head>
+                <body>
+                <div class="container">
+                <h2>📅 历史周记录 - ${fecha}</h2>
+                
+                <div class="section-title">📊 本周排名（按表现排序）</div>
+                <table>
+                <thead><tr><th>排名</th><th>姓名</th><th>迟到</th><th>早退</th><th>缺勤</th><th>状态</th></tr></thead>
+                <tbody>
+            `;
+            results.forEach((r, index) => {
+                let rankIcon = '';
+                if (index === 0) rankIcon = '🏆';
+                else if (index === 1) rankIcon = '🥈';
+                else if (index === 2) rankIcon = '🥉';
+                else rankIcon = index+1;
+                const status = r.perfect ? '<span class="perfect">✨ 全勤</span>' : '';
+                html += `<tr><td class="rank-icon">${rankIcon}</td><td>${r.name}</td><td>${r.late}</td><td>${r.early}</td><td>${r.absent}</td><td>${status}</td></tr>`;
+            });
+            html += `</tbody></td>`;
+
+            html += `<div class="section-title">📋 详细打卡记录</div><table><thead><tr><th>Empleado</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th></td></thead><tbody>`;
+            empleados.forEach(emp => {
+                html += `<tr><td style="font-weight:600;">${emp.nombre}</td>`;
+                for (let d = 0; d < 6; d++) {
+                    const t = emp.tiempos[d];
+                    const entrada = t.entrada || '--:--';
+                    const salida = t.salida || '--:--';
+                    html += `<td><span class="entrada">${entrada}</span><br><span class="salida">${salida}</span></td>`;
+                }
+                html += `</tr>`;
+            });
+            html += `</tbody></table><div class="footer">⏱️ 缺勤显示 --:--，颜色与主程序一致</div></div></body></html>`;
+            win.document.write(html);
+            win.document.close();
+        }
+
+        function initSampleRows() {
+            const names = ['Armando', 'Angeles', 'Fernanda', 'Miquel', 'Melissa', 'Francisco', 'Priscila', 'Marlen', 'Hanny', 'Damaris', 'Hilary', 'Dulce'];
+            names.forEach(n => tbodyMain.appendChild(createEmployeeRow(n)));
+            actualizarColores();
+            actualizarBotonLock();
+            actualizarEstadisticas();
+            actualizarBotonesPorEstado();
+            resaltarColumnaActual();
+            guardarSemanaActual();
+        }
+
+        function inicializarDesdeGuardado() {
+            const saved = localStorage.getItem(CURRENT_WEEK_KEY);
+            if (saved) {
+                try {
+                    const empleados = JSON.parse(saved);
+                    restaurarSemana(empleados);
+                } catch (e) {
+                    initSampleRows();
+                }
+            } else {
+                initSampleRows();
+            }
+        }
+
+        // 报表函数（完整保留）
+        function generateReportFromHistory(startDate, endDate, title) {
+            if (historial.length === 0) {
+                alert('没有历史记录，无法生成报表。');
+                return;
+            }
+
+            const employeeStats = {};
+
+            historial.forEach(week => {
+                const weekDate = new Date(week.fecha.replace(/\//g, '-'));
+                if (isNaN(weekDate)) return;
+                if (weekDate >= startDate && weekDate <= endDate) {
+                    week.empleados.forEach(emp => {
+                        const name = emp.nombre;
+                        if (!employeeStats[name]) {
+                            employeeStats[name] = { late: 0, early: 0, absent: 0, weeks: 0 };
+                        }
+                        const stat = employeeStats[name];
+                        let late = 0, early = 0, absent = 0;
+                        emp.tiempos.forEach(t => {
+                            const inVal = t.entrada || '';
+                            const outVal = t.salida || '';
+                            if (!inVal.trim() || !outVal.trim()) {
+                                absent++;
+                            } else {
+                                const inMin = timeToMinutes(inVal);
+                                const outMin = timeToMinutes(outVal);
+                                if (inMin !== null && inMin > LATE_THRESHOLD_RED) late++;
+                                if (outMin !== null && outMin < EARLY_THRESHOLD) early++;
+                            }
+                        });
+                        stat.late += late;
+                        stat.early += early;
+                        stat.absent += absent;
+                        stat.weeks++;
+                    });
+                }
+            });
+
+            if (Object.keys(employeeStats).length === 0) {
+                alert('指定日期范围内没有历史记录。');
+                return;
+            }
+
+            const results = Object.entries(employeeStats).map(([name, stat]) => ({
+                name,
+                late: stat.late,
+                early: stat.early,
+                absent: stat.absent,
+                weeks: stat.weeks,
+                totalDays: stat.weeks * 6,
+                actualDays: stat.weeks * 6 - stat.absent
+            }));
+
+            results.sort((a, b) => {
+                if (a.absent !== b.absent) return a.absent - b.absent;
+                if (a.late !== b.late) return a.late - b.late;
+                return a.early - b.early;
+            });
+
+            const win = window.open('', '_blank');
+            if (!win) {
+                alert('浏览器阻止了弹窗，请允许后再试。');
+                return;
+            }
+
+            const startStr = startDate.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+            const endStr = endDate.toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' });
+
+            let html = `
+                <!DOCTYPE html>
+                <html>
+                <head><meta charset="UTF-8"><title>${title}</title>
+                <style>
+                    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f2f2f7; padding:20px; }
+                    .container { max-width:800px; margin:0 auto; background:white; border-radius:24px; padding:25px; box-shadow:0 10px 20px rgba(0,0,0,0.1); }
+                    h2 { color:#1c1c1e; border-left:5px solid #007aff; padding-left:15px; margin-top:0; }
+                    .date-range { color:#8e8e93; margin-bottom:20px; }
+                    table { width:100%; border-collapse: collapse; margin-top:15px; }
+                    th { background:#f2f2f7; color:#1c1c1e; padding:12px; border-bottom:1px solid #c6c6c8; }
+                    td { padding:10px; border-bottom:1px solid #e5e5ea; text-align:center; }
+                    .rank-icon { font-size:1.2rem; }
+                    .footer { margin-top:20px; color:#8e8e93; text-align:center; }
+                </style>
+                </head>
+                <body>
+                <div class="container">
+                <h2>📋 员工考勤 ${title}</h2>
+                <div class="date-range">📅 统计周期：${startStr} 至 ${endStr}</div>
+                <table>
+                <thead><tr><th>排名</th><th>姓名</th><th>迟到</th><th>早退</th><th>缺勤</th><th>总周数</th><th>应出勤</th><th>实际出勤</th></tr></thead>
+                <tbody>
+            `;
+            results.forEach((r, index) => {
+                let rankIcon = '';
+                if (index === 0) rankIcon = '🏆';
+                else if (index === 1) rankIcon = '🥈';
+                else if (index === 2) rankIcon = '🥉';
+                else rankIcon = index+1;
+                html += `<tr><td class="rank-icon">${rankIcon}</td><td>${r.name}</td><td>${r.late}</td><td>${r.early}</td><td>${r.absent}</td><td>${r.weeks}</td><td>${r.totalDays}</td><td>${r.actualDays}</td></tr>`;
+            });
+            html += `
+                </tbody>
+            </table>
+                <div class="footer">⏱️ 应出勤 = 周数 × 6天</div>
+                <div style="text-align:center; margin-top:20px;">
+                    <button onclick="window.print()" style="background:#007aff; border:none; color:white; padding:8px 20px; border-radius:40px; cursor:pointer;">🖨️ 打印报表</button>
+                </div>
+                </div>
+                </body>
+                </html>
+            `;
+            win.document.write(html);
+            win.document.close();
+        }
+
+        // 设置日期输入框默认值
+        function setDefaultDateRange() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const formatDate = (date) => {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const d = String(date.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            };
+            document.getElementById('startDate').value = formatDate(firstDay);
+            document.getElementById('endDate').value = formatDate(lastDay);
+        }
+        setDefaultDateRange();
+
+        // 打印工资卡函数（完整保留，略去重复代码）
+        function printSalaryCards() {
+            const rows = document.querySelectorAll('#salaryEmployeeBody tr:not(.total-row)');
+            if (rows.length === 0) {
+                alert('没有员工数据，无法生成工资卡。');
+                return;
+            }
+            const employees = [];
+            rows.forEach(row => {
+                const cells = row.children;
+                const name = cells[0]?.innerText.trim() || '';
+                const weeklyInput = cells[1]?.querySelector('input');
+                const weekly = weeklyInput ? parseFloat(weeklyInput.value) || 0 : 0;
+                const late = parseInt(cells[2]?.innerText.trim()) || 0;
+                const early = parseInt(cells[3]?.innerText.trim()) || 0;
+                const absent = parseInt(cells[4]?.innerText.trim()) || 0;
+                const detail = cells[5]?.innerText.trim() || '';
+                const finalText = cells[6]?.innerText.trim() || '$0';
+                const final = parseFloat(finalText.replace('$', '')) || 0;
+                employees.push({ name, weekly, late, early, absent, detail, final });
+            });
+            const weekDates = getWeekDates();
+            const startStr = weekDates[0].toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const endStr = weekDates[5].toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const defaultWeekRange = `${startStr} - ${endStr}`;
+            const todayStr = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const win = window.open('', '_blank');
+            if (!win) { alert('请允许弹窗'); return; }
+            win.document.write(`
+                <!DOCTYPE html>
+                <html lang="es">
+                <head><meta charset="UTF-8"><title>Tarjetas de salario - Wanyi</title>
+                <style>
+                    body { background: #f2f2f7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 20px; }
+                    .print-container { max-width: 1200px; margin: 0 auto; }
+                    .cards-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: flex-start; }
+                    .salary-card { flex: 0 0 calc(50% - 20px); min-width: 340px; background: linear-gradient(145deg, #fff9e6, #ffefd2); border: 2px solid #b8860b; padding: 22px 20px; box-shadow: 0 12px 24px rgba(0,0,0,0.15); page-break-inside: avoid; border-radius: 0; }
+                    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #ffd966; padding: 8px 12px; border: 1px solid #b8860b; }
+                    .employee-name { font-size: 2rem; font-weight: 800; color: #8b4513; }
+                    .pago-real-display { font-size: 2.2rem; font-weight: 800; color: #c0392b; margin: 8px 0; background: #ffe5e5; padding: 8px 16px; display: inline-block; border: 2px solid #c0392b; }
+                    .detail-list { background: #f5f0e6; border: 2px solid #b8860b; padding: 16px; margin: 15px 0; }
+                    .signature-line { border-top: 3px dashed #8b4513; margin-top: 20px; padding-top: 12px; display: flex; align-items: center; gap: 10px; }
+                    @media print { .print-actions { display: none; } .salary-card { break-inside: avoid; } }
+                </style>
+                </head>
+                <body>
+                <div class="print-container"><div class="print-actions"><button onclick="window.print()">🖨️ Imprimir</button></div><div class="cards-grid" id="cardsGrid"></div></div>
+                <script>
+                    const salarySettings = ${JSON.stringify(salarySettings)};
+                    function calcularSalarioFinal(weekly, late, early, absent) {
+                        let total = weekly;
+                        if (absent > 0) total -= absent * salarySettings.absentDeduct;
+                        if (early === 0 && absent === 0) {
+                            if (late === 0) total += salarySettings.perfectBonus;
+                            else if (late === 1) total += salarySettings.onceLateBonus;
+                            else if (late > 1) total -= (late - 1) * salarySettings.lateDeduct;
+                        } else if (late > 1) total -= (late - 1) * salarySettings.lateDeduct;
+                        return Math.max(Math.round(total), 0);
+                    }
+                    const employees = ${JSON.stringify(employees)};
+                    let html = '';
+                    employees.forEach(emp => {
+                        html += \`
+                            <div class="salary-card">
+                                <div class="card-header"><span class="employee-name">\${emp.name}</span><span>📅 ${todayStr}</span></div>
+                                <div>Salario semanal: $\${emp.weekly}</div>
+                                <div>Semana: <input type="text" value="${defaultWeekRange}"></div>
+                                <div class="pago-real-display">$<input type="number" value="\${Math.round(emp.final)}" step="1"></div>
+                                <div class="detail-list"><strong>Detalles:</strong> \${emp.detail}</div>
+                                <div class="signature-line"><span>Firma del empleado</span><input type="text" placeholder="____________________"></div>
+                            </div>
+                        \`;
+                    });
+                    document.getElementById('cardsGrid').innerHTML = html;
+                <\/script>
+                </body>
+                </html>
+            `);
+            win.document.close();
+        }
+
+        // 导出导入数据
+        function exportAllData() {
+            const data = {
+                attendance: capturarEstadoSemana(),
+                historial: historial,
+                salarySettings: salarySettings,
+                employeeSalaries: employeeSalaries,
+                salaryHistory: salaryHistory,
+                debts: debts,
+                categories: categories,
+                password: localStorage.getItem(PASSWORD_KEY)
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `考勤备份_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        function importAllData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json,application/json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        if (data.attendance) restaurarSemana(data.attendance);
+                        if (data.historial) {
+                            historial = data.historial;
+                            guardarHistorial();
+                            renderHistorial();
+                        }
+                        if (data.salarySettings) {
+                            salarySettings = data.salarySettings;
+                            saveSalarySettings();
+                            loadSalarySettings();
+                        }
+                        if (data.employeeSalaries) {
+                            employeeSalaries = data.employeeSalaries;
+                            saveEmployeeSalaries();
+                        }
+                        if (data.salaryHistory) {
+                            salaryHistory = data.salaryHistory;
+                            saveSalaryHistory();
+                        }
+                        if (data.debts) {
+                            debts = data.debts;
+                            saveDebts();
+                        }
+                        if (data.categories) {
+                            categories = data.categories;
+                            saveCategories();
+                        }
+                        if (data.password) localStorage.setItem(PASSWORD_KEY, data.password);
+                        alert('数据导入成功！');
+                    } catch (err) {
+                        alert('文件格式错误：' + err);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // 事件绑定（所有功能按钮）
+        document.getElementById('toggleLockBtn').addEventListener('click', toggleLock);
+        document.getElementById('addRowBtn').addEventListener('click', () => solicitarPassword(() => { if (tbodyMain.children.length < MAX_EMPLOYEES) tbodyMain.appendChild(createEmployeeRow('')); else alert('已达上限'); actualizarColores(); actualizarBotonLock(); guardarSemanaActual(); actualizarEstadisticas(); }));
+        document.getElementById('calcBtn').addEventListener('click', actualizarEstadisticas);
+        document.getElementById('saveWeekBtn').addEventListener('click', () => solicitarPassword(() => { const estado = capturarEstadoSemana(); const fecha = new Date().toLocaleString(); historial.push({ id: Date.now(), fecha, empleados: estado }); guardarHistorial(); renderHistorial(); alert('本周已保存'); }));
+        document.getElementById('clearBtn').addEventListener('click', () => solicitarPassword(() => { document.querySelectorAll('#attendanceTable input').forEach(inp => { if (inp.placeholder !== 'Nombre') inp.value = ''; }); actualizarColores(); guardarSemanaActual(); actualizarEstadisticas(); }));
+        document.getElementById('changePwdBtn').addEventListener('click', () => { const old = prompt('当前密码:'); if (old !== getAdminPassword()) { alert('密码错误'); return; } const p1 = prompt('新密码'), p2 = prompt('确认'); if (p1 && p1 === p2) localStorage.setItem(PASSWORD_KEY, p1); else alert('不一致'); });
+        document.getElementById('nextWeekBtn').addEventListener('click', () => { const estado = capturarEstadoSemana(); historial.push({ id: Date.now(), fecha: new Date().toLocaleString(), empleados: estado }); guardarHistorial(); document.querySelectorAll('#attendanceTable input').forEach(inp => { if (inp.placeholder !== 'Nombre') inp.value = ''; }); actualizarColores(); guardarSemanaActual(); actualizarEstadisticas(); actualizarBotonesPorEstado(); resaltarColumnaActual(); });
+        document.getElementById('restoreBtn').addEventListener('click', () => { if (!historial.length) { alert('无历史'); return; } const idx = prompt(`输入序号 (1-${historial.length}):`); if (idx && !isNaN(idx) && idx >= 1 && idx <= historial.length) restaurarSemana(historial[idx-1].empleados); });
+        document.getElementById('salaryCalcBtn').addEventListener('click', openSalaryCalcModal);
+        document.getElementById('cancelSalaryCalcBtn').addEventListener('click', closeSalaryCalcModal);
+        document.getElementById('recalcSalaryBtn').addEventListener('click', () => { saveSalarySettings(); const v = document.getElementById('weekSelect').value; renderSalaryModal(v === 'current' ? null : historial.find(h => h.id == v)); });
+        document.getElementById('saveSalaryCalcBtn').addEventListener('click', () => { saveSalarySettings(); document.querySelectorAll('.weekly-salary-input').forEach(inp => { employeeSalaries[inp.dataset.name] = parseFloat(inp.value) || 0; }); saveEmployeeSalaries(); const v = document.getElementById('weekSelect').value; const weekData = v === 'current' ? null : historial.find(h => h.id == v); const stats = getAttendanceStatsFromWeek(weekData); const employees = []; for (let i = 0; i < stats.length; i++) { const wk = employeeSalaries[stats[i].name] || 0; const empty = isWeekTotallyEmpty(weekData, i); const { total, detail } = calculateSalaryDetail(stats[i], wk, empty); employees.push({ ...stats[i], weekly: wk, detail, total }); } salaryHistory.push({ id: Date.now(), date: new Date().toLocaleString(), week: v === 'current' ? '当前周' : (weekData?.fecha || ''), employees }); saveSalaryHistory(); alert('工资单已保存'); closeSalaryCalcModal(); });
+        document.getElementById('salaryHistoryBtn').addEventListener('click', openSalaryHistoryModal);
+        document.getElementById('closeSalaryHistoryBtn').addEventListener('click', closeSalaryHistoryModal);
+        document.getElementById('chartBtn').addEventListener('click', openChartModal);
+        document.getElementById('closeChartBtn').addEventListener('click', closeChartModal);
+        document.getElementById('debtBtn').addEventListener('click', openDebtModal);
+        document.getElementById('closeDebtBtn').addEventListener('click', closeDebtModal);
+        document.getElementById('addDebtBtn').addEventListener('click', addDebt);
+        document.getElementById('addPaymentBtn').addEventListener('click', addPayment);
+        document.getElementById('manageCategoryBtn').addEventListener('click', openCategoryModal);
+        document.getElementById('addCategoryBtn').addEventListener('click', () => { const newCat = document.getElementById('newCategoryName').value.trim(); if (newCat && !categories.includes(newCat)) { categories.push(newCat); saveCategories(); renderCategoryList(); refreshDebtModal(); document.getElementById('newCategoryName').value = ''; } else alert('类别已存在或为空'); });
+        document.getElementById('closeCategoryBtn').addEventListener('click', closeCategoryModal);
+        document.getElementById('reportBtn').addEventListener('click', () => { const weekDates = getWeekDates(); generateReportFromHistory(weekDates[0], weekDates[5], '周报表'); });
+        document.getElementById('monthReportBtn').addEventListener('click', () => { const now = new Date(); const first = new Date(now.getFullYear(), now.getMonth(), 1); const last = new Date(now.getFullYear(), now.getMonth()+1, 0); generateReportFromHistory(first, last, '月报表'); });
+        document.getElementById('yearReportBtn').addEventListener('click', () => { const now = new Date(); const first = new Date(now.getFullYear(), 0, 1); const last = new Date(now.getFullYear(), 11, 31); generateReportFromHistory(first, last, '年报表'); });
+        document.getElementById('customReportBtn').addEventListener('click', () => { const start = new Date(document.getElementById('startDate').value); const end = new Date(document.getElementById('endDate').value); if (!isNaN(start) && !isNaN(end)) generateReportFromHistory(start, end, '自定义报表'); else alert('日期无效'); });
+        document.getElementById('exportExcelBtn').addEventListener('click', () => alert('导出Excel模拟（实际可生成CSV）'));
+        document.getElementById('printSalaryBtn').addEventListener('click', () => window.print());
+        document.getElementById('printSalaryCardsBtn').addEventListener('click', printSalaryCards);
+        document.getElementById('exportDataBtn').addEventListener('click', exportAllData);
+        document.getElementById('importDataBtn').addEventListener('click', importAllData);
+
+        // 启动
+        const savedWeek = localStorage.getItem(CURRENT_WEEK_KEY);
+        if (savedWeek) restaurarSemana(JSON.parse(savedWeek)); else initSampleRows();
+        cargarHistorial();
+        loadSalarySettings();
+        loadEmployeeSalaries();
+        loadSalaryHistory();
+        loadDebts();
+        loadCategories();
+        setInterval(() => { resaltarColumnaActual(); actualizarBotonesPorEstado(); }, 60000);
+    })();
+</script>
+
+</body></html>
