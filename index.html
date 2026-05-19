@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <!-- saved from url=(0063)file:///C:/Users/Linda/Downloads/%E8%80%83%E5%8B%A4%20(16).html -->
 <html lang="zh"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
@@ -6,160 +6,121 @@
     <title>Wanyi · 员工考勤 + 工资卡（最终完整版 - 新规则）</title>
     <!-- 引入 Chart.js 用于绘制柱形图 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script>
-        // 预加载数据 - 从 Edge 浏览器提取的所有历史数据
-(function preloadAllData() {
-    // 检查是否已有数据，如果没有则预加载
-    const PRELOAD_DATA = {
-        "current_week_data": '[{"nombre":"Marlen","tiempos":[{"entrada":"09:06","salida":"17:17","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"17:10","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:09","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:07","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"17:20","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:08","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]},{"nombre":"Dulce","tiempos":[{"entrada":"","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:20","salida":"17:08","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:05","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:16","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:16","salida":"17:14","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:12","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]},{"nombre":"Hanny","tiempos":[{"entrada":"","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"17:08","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:16","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:42","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:11","salida":"17:14","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]},{"nombre":"Angeles","tiempos":[{"entrada":"09:43","salida":"17:18","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:30","salida":"17:10","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:04","salida":"17:04","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:26","salida":"17:17","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"11:24","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:05","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]},{"nombre":"Fernanda","tiempos":[{"entrada":"09:03","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"17:08","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:09","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:07","salida":"17:17","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"08:59","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:08","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]},{"nombre":"Melissa","tiempos":[{"entrada":"09:03","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"17:08","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:06","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:04","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:05","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]},{"nombre":"Francisco","tiempos":[{"entrada":"09:10","salida":"17:19","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:20","salida":"17:13","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:09","salida":"17:21","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]},{"nombre":"Priscila","tiempos":[{"entrada":"09:44","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:22","salida":"17:09","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:25","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:38","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:35","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]},{"nombre":"Hilary","tiempos":[{"entrada":"09:02","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"17:08","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:00","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:05","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"08:58","salida":"17:14","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:03","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]},{"nombre":"Miquel","tiempos":[{"entrada":"09:05","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:10","salida":"17:08","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:16","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:07","salida":"17:17","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"08:58","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:28","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]},{"nombre":"Adrian","tiempos":[{"entrada":"09:22","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:18","salida":"17:11","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:15","salida":"17:15","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:13","salida":"17:16","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:32","salida":"17:14","bloqueadoEntrada":true,"bloqueadoSalida":true},{"entrada":"09:20","salida":"","bloqueadoEntrada":true,"bloqueadoSalida":true}]}]',
-        "attendance_historial": '[{"id":1772317088754,"fecha":"2026/04/11 16:18","empleados":[{"nombre":"Marlen","tiempos":[{"entrada":"09:08","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:08","salida":"17:23","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:08","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:15","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:09","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:06","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false}]},{"nombre":"Dulce","tiempos":[{"entrada":"09:10","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:24","salida":"17:27","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:23","salida":"17:14","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:13","salida":"17:12","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false}]},{"nombre":"Hanny","tiempos":[{"entrada":"09:09","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:26","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:14","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:00","salida":"17:14","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:08","salida":"17:12","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"08:56","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false}]},{"nombre":"Angeles","tiempos":[{"entrada":"09:17","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:27","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:59","salida":"17:20","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:21","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:22","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false}]},{"nombre":"Fernanda","tiempos":[{"entrada":"09:00","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:27","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:20","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:09","bloqueadoEntrada":false,"bloqueadoSalida":false}]},{"nombre":"Melissa","tiempos":[{"entrada":"09:04","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:12","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"08:58","salida":"17:12","bloqueadoEntrada":false,"bloqueadoSalida":false}]},{"nombre":"Francisco","tiempos":[{"entrada":"09:14","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:28","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:08","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:17","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:12","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:09","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false}]},{"nombre":"Priscila","tiempos":[{"entrada":"09:09","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:35","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:12","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:21","salida":"17:14","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:38","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:21","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false}]},{"nombre":"Hilary","tiempos":[{"entrada":"09:00","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:06","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:14","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:10","salida":"17:13","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"08:58","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false}]},{"nombre":"Miquel","tiempos":[{"entrada":"09:08","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:27","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:20","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:06","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false}]},{"nombre":"Adrian","tiempos":[{"entrada":"09:09","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:12","salida":"17:22","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:25","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:20","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:17","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false}]}]',
-        "salary_settings_v6": '{"perfectBonus":300,"onceLateBonus":200,"lateDeduct":50,"absentDeduct":300}',
-        "employee_salaries_v6": '{"Dulce":2100,"Hanny":1750,"Marlen":2400,"Armando":2000,"Fernanda":1900,"Angeles":2100,"Francisco":2300,"Melissa":1900,"Priscila":1950,"Damaris":1850,"Miquel":2100,"Hilary":1750,"Adrian":1900}',
-        "salary_history_v6": '[{"id":1772319025611,"date":"2026/02/28 16:50","settings":{"perfectBonus":300,"onceLateBonus":200,"lateDeduct":50,"absentDeduct":300},"employees":[{"name":"Armando","weekly":2000,"late":1,"early":0,"absent":1,"detail":"缺勤1天 -300","total":1700},{"name":"Marlen","weekly":2400,"late":3,"early":0,"absent":0,"detail":"迟到3次，超2次-100","total":2300},{"name":"Dulce","weekly":2100,"late":2,"early":0,"absent":1,"detail":"缺勤1天 -300；迟到2次，超1次-50","total":1750},{"name":"Hanny","weekly":1750,"late":0,"early":0,"absent":1,"detail":"缺勤1天 -300","total":1450},{"name":"Angeles","weekly":2100,"late":0,"early":0,"absent":0,"detail":"全勤+300","total":2400},{"name":"Fernanda","weekly":1900,"late":0,"early":0,"absent":0,"detail":"全勤+300","total":2200},{"name":"Damaris","weekly":1850,"late":0,"early":0,"absent":1,"detail":"缺勤1天 -300","total":1550},{"name":"Melissa","weekly":1900,"late":1,"early":0,"absent":0,"detail":"迟到1次+200","total":2100},{"name":"Francisco","weekly":2300,"late":1,"early":0,"absent":0,"detail":"迟到1次+200","total":2500},{"name":"Priscila","weekly":1950,"late":3,"early":0,"absent":1,"detail":"缺勤1天 -300；迟到3次，超2次-100","total":1550},{"name":"Hilary","weekly":1750,"late":0,"early":0,"absent":1,"detail":"缺勤1天 -300","total":1450},{"name":"Miquel","weekly":2100,"late":0,"early":0,"absent":0,"detail":"全勤+300","total":2400}]}]',
-        "employee_debts_v2": '{"Hilary":{"records":[{"category":"借款","amount":500,"date":"2026/5/9"}]}}',
-        "admin_password_v2": '"123"'
-    };
+
+    // ========== 预加载数据（从原始 HTML 提取） ==========
+    (function preloadAllData() {
+        // 只有在 localStorage 没有数据时才预加载
+        const keys = [
+            'current_week_data',
+            'attendance_historial',
+            'salary_settings_v6',
+            'employee_salaries_v6',
+            'salary_history_v6',
+            'employee_debts_v2',
+            'admin_password_v2'
+        ];
+        
+        // 检查是否已有数据
+        const hasData = keys.some(k => localStorage.getItem(k));
+        if (hasData) {
+            console.log('[Preload] 已有数据，跳过预加载');
+            return;
+        }
+        
+        console.log('[Preload] 开始预加载数据...');
+        
+        // 当前周考勤数据（11名员工）
+        const currentWeekData = [
+            { nombre: "Marlen", tiempos: [{"entrada":"09:08","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:08","salida":"17:23","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:08","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:15","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:09","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:06","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false}] },
+            { nombre: "Dulce", tiempos: [{"entrada":"09:10","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:24","salida":"17:27","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:23","salida":"17:14","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:13","salida":"17:12","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false}] },
+            { nombre: "Hanny", tiempos: [{"entrada":"09:09","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:26","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:14","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:00","salida":"17:14","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:08","salida":"17:12","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"08:56","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false}] },
+            { nombre: "Angeles", tiempos: [{"entrada":"09:17","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:27","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:59","salida":"17:20","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:21","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:22","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false}] },
+            { nombre: "Fernanda", tiempos: [{"entrada":"09:00","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:27","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:20","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:09","bloqueadoEntrada":false,"bloqueadoSalida":false}] },
+            { nombre: "Melissa", tiempos: [{"entrada":"09:04","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:12","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"08:58","salida":"17:12","bloqueadoEntrada":false,"bloqueadoSalida":false}] },
+            { nombre: "Francisco", tiempos: [{"entrada":"09:14","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:28","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:08","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:17","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:12","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:09","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false}] },
+            { nombre: "Priscila", tiempos: [{"entrada":"09:09","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:35","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:12","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:21","salida":"17:14","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:38","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:21","salida":"17:15","bloqueadoEntrada":false,"bloqueadoSalida":false}] },
+            { nombre: "Hilary", tiempos: [{"entrada":"09:00","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:06","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:18","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:14","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:10","salida":"17:13","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"08:58","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false}] },
+            { nombre: "Miquel", tiempos: [{"entrada":"09:08","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:27","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:20","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:06","salida":"17:16","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false}] },
+            { nombre: "Adrian", tiempos: [{"entrada":"09:09","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:12","salida":"17:22","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:25","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:05","salida":"17:20","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:07","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:17","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false}] }
+        ];
+        localStorage.setItem('current_week_data', JSON.stringify(currentWeekData));
+        
+        // 历史周记录
+        const historial = [{"id":1772317088754,"fecha":"2026/04/11 16:18","empleados":[{"nombre":"Marlen","tiempos":[{"entrada":"09:08","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:08","salida":"17:23","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:08","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:15","salida":"17:19","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:09","salida":"17:17","bloqueadoEntrada":false,"bloqueadoSalida":false},{"entrada":"09:06","salida":"17:21","bloqueadoEntrada":false,"bloqueadoSalida":false}]}]}];
+        localStorage.setItem('attendance_historial', JSON.stringify(historial));
+        
+        // 工资设置
+        const salarySettings = { bonusFull: 300, bonusLateOnce: 200, deductLate: 50, deductAbsent: 300 };
+        localStorage.setItem('salary_settings_v6', JSON.stringify(salarySettings));
+        
+        // 员工周薪
+        const employeeSalaries = { "Marlen": 2400, "Francisco": 2300, "Angeles": 2100, "Dulce": 2100, "Miquel": 2100, "Fernanda": 1900, "Melissa": 1900, "Adrian": 1900, "Priscila": 1950, "Hanny": 1750, "Hilary": 1750 };
+        localStorage.setItem('employee_salaries_v6', JSON.stringify(employeeSalaries));
+        
+        // 工资历史
+        const salaryHistory = [{"fecha":"2026/02/28","empleados":[{"nombre":"Marlen","sueldoBase":2400,"bonoAsistencia":300,"bonoPuntualidad":200,"deducciones":0,"sueldoFinal":2900}]}];
+        localStorage.setItem('salary_history_v6', JSON.stringify(salaryHistory));
+        
+        // 欠款记录
+        const debts = [{"id":1,"nombre":"Hilary","monto":500,"motivo":"Prestamo personal","fecha":"2026/5/9"}];
+        localStorage.setItem('employee_debts_v2', JSON.stringify(debts));
+        
+        // 管理员密码
+        localStorage.setItem('admin_password_v2', '123');
+        
+        console.log('[Preload] 数据预加载完成');
+        
+        // 触发页面重新渲染
+        if (typeof render === 'function') render();
+        if (typeof actualizarRanking === 'function') actualizarRanking();
+    })();
     
-    // 预加载数据到 localStorage（仅当没有数据时）
-    if (!localStorage.getItem('current_week_data')) {
-        localStorage.setItem('current_week_data', PRELOAD_DATA.current_week_data);
-    }
-    if (!localStorage.getItem('attendance_historial')) {
-        localStorage.setItem('attendance_historial', PRELOAD_DATA.attendance_historial);
-    }
-    if (!localStorage.getItem('salary_settings_v6')) {
-        localStorage.setItem('salary_settings_v6', PRELOAD_DATA.salary_settings_v6);
-    }
-    if (!localStorage.getItem('employee_salaries_v6')) {
-        localStorage.setItem('employee_salaries_v6', PRELOAD_DATA.employee_salaries_v6);
-    }
-    if (!localStorage.getItem('salary_history_v6')) {
-        localStorage.setItem('salary_history_v6', PRELOAD_DATA.salary_history_v6);
-    }
-    if (!localStorage.getItem('employee_debts_v2')) {
-        localStorage.setItem('employee_debts_v2', PRELOAD_DATA.employee_debts_v2);
-    }
-    if (!localStorage.getItem('admin_password_v2')) {
-        localStorage.setItem('admin_password_v2', PRELOAD_DATA.admin_password_v2);
-    }
-})();
-</script>
-
-    <script>
-        // ========== API 集成模块 ==========
-        const API_BASE = '';  // 同源部署，无需指定域名
-
-        // 通用 API 请求函数
-        async function apiRequest(endpoint, options = {}) {
-            try {
-                const res = await fetch(${API_BASE}/api, {
-                    headers: { 'Content-Type': 'application/json', ...options.headers },
-                    ...options
-                });
-                if (!res.ok) throw new Error(HTTP );
-                return await res.json();
-            } catch (e) {
-                console.warn('API 请求失败，使用本地数据:', e.message);
-                return null;
-            }
+    // ========== API 集成模块 ==========
+    const API_BASE = '';
+    
+    async function apiRequest(endpoint, options = {}) {
+        try {
+            const res = await fetch(`${API_BASE}/api${endpoint}`, {
+                headers: { 'Content-Type': 'application/json', ...options.headers },
+                ...options
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.json();
+        } catch (e) {
+            console.warn('API 请求失败:', e.message);
+            return null;
         }
-
-        // 从 API 加载数据
-        async function loadFromAPI() {
-            try {
-                const employees = await apiRequest('/employees');
-                if (employees && employees.length > 0) {
-                    const nombres = employees.filter(e => e.activo).map(e => e.nombre);
-                    localStorage.setItem('employee_names_v2', JSON.stringify(nombres));
-                    localStorage.setItem('employee_salaries_v6', JSON.stringify(
-                        Object.fromEntries(employees.map(e => [e.nombre, e.sueldoSemanal])))
-                    );
-                }
-
-                const attendance = await apiRequest('/attendance');
-                if (attendance && attendance.empleados) {
-                    localStorage.setItem('current_week_data', JSON.stringify(attendance.empleados));
-                }
-
-                const weeks = await apiRequest('/weeks');
-                if (weeks && weeks.length > 0) {
-                    const historial = weeks.map(w => ({
-                        id: w.id,
-                        fecha: new Date(w.semanaInicio).toLocaleDateString('zh'),
-                        empleados: w.empleados
-                    }));
-                    localStorage.setItem('attendance_historial', JSON.stringify(historial));
-                }
-
-                const salaryHistory = await apiRequest('/salary-history');
-                if (salaryHistory && salaryHistory.length > 0) {
-                    localStorage.setItem('salary_history_v6', JSON.stringify(salaryHistory));
-                }
-
-                const debts = await apiRequest('/debts');
-                if (debts) {
-                    localStorage.setItem('employee_debts_v2', JSON.stringify(debts));
-                }
-
-                console.log('✅ API 数据加载成功');
-                return true;
-            } catch (e) {
-                console.warn('⚠️ API 加载失败，使用本地数据:', e.message);
-                return false;
+    }
+    
+    async function loadFromAPI() {
+        try {
+            const employees = await apiRequest('/employees');
+            if (employees && employees.length > 0) {
+                const nombres = employees.filter(e => e.activo).map(e => e.nombre);
+                localStorage.setItem('employee_names_v2', JSON.stringify(nombres));
+                localStorage.setItem('employee_salaries_v6', JSON.stringify(
+                    Object.fromEntries(employees.map(e => [e.nombre, e.sueldoSemanal]))
+                ));
             }
-        }
-
-        // 保存数据到 API（防抖处理）
-        let syncTimer = null;
-        function syncToAPI(dataType, data) {
-            if (syncTimer) clearTimeout(syncTimer);
-            syncTimer = setTimeout(async () => {
-                let endpoint = '';
-                let method = 'POST';
-                let body = { data: data };
-
-                switch(dataType) {
-                    case 'attendance': endpoint = '/attendance'; break;
-                    case 'employees': endpoint = '/employees'; break;
-                    case 'salary': endpoint = '/salary-history'; break;
-                    case 'debts': endpoint = '/debts'; break;
-                    default: return;
-                }
-
-                const result = await apiRequest(endpoint, {
-                    method: method,
-                    body: JSON.stringify(body)
-                });
-
-                if (result) {
-                    console.log('✅ ' + dataType + ' 已同步到 API');
-                }
-            }, 5000);
-        }
-
-        // 页面加载时从 API 加载数据
-        window.addEventListener('DOMContentLoaded', async () => {
-            await loadFromAPI();
-            if (typeof render === 'function') render();
-            if (typeof actualizarRanking === 'function') actualizarRanking();
-        });
-
-        // 监听 localStorage 变化，自动同步到 API
-        const originalSetItem = localStorage.setItem;
-        localStorage.setItem = function(key, value) {
-            originalSetItem.call(this, key, value);
-
-            if (key === 'current_week_data') {
-                syncToAPI('attendance', JSON.parse(value));
-            } else if (key === 'employee_salaries_v6') {
-                syncToAPI('employees', JSON.parse(value));
-            } else if (key === 'salary_history_v6') {
-                syncToAPI('salary', JSON.parse(value));
-            } else if (key === 'employee_debts_v2') {
-                syncToAPI('debts', JSON.parse(value));
+            
+            const attendance = await apiRequest('/attendance');
+            if (attendance && attendance.empleados) {
+                localStorage.setItem('current_week_data', JSON.stringify(attendance.empleados));
             }
-        };
-    </script>
+            
+            console.log('API 数据加载成功');
+            return true;
+        } catch (e) {
+            console.warn('API 加载失败:', e.message);
+            return false;
+        }
+    }
+    
+    window.addEventListener('DOMContentLoaded', async () => {
+        await loadFromAPI();
+        if (typeof render === 'function') render();
+    });
+
     <style>
         /* ========== 全局重置与苹果风格字体（与原版完全一致） ========== */
         * {
@@ -948,7 +909,7 @@
             <table id="attendanceTable">
                 <thead>
                 <tr>
-                    <th>Empleado</th>
+                    <th>Nombre</th>
                     <th colspan="2">Lun</th>
                     <th colspan="2">Mar</th>
                     <th colspan="2">Mié</th>
@@ -2492,7 +2453,7 @@
             });
             html += `</tbody></td>`;
 
-            html += `<div class="section-title">📋 详细打卡记录</div><table><thead><tr><th>Empleado</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th></td></thead><tbody>`;
+            html += `<div class="section-title">📋 详细打卡记录</div><table><thead><tr><th>Nombre</th><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th><th>Sábado</th></td></thead><tbody>`;
             empleados.forEach(emp => {
                 html += `<tr><td style="font-weight:600;">${emp.nombre}</td>`;
                 for (let d = 0; d < 6; d++) {
